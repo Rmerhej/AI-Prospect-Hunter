@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: ai-prospect-hunter
+
+  datasource:
+    url: jdbc:mysql://localhost:3308/ai_prospect_hunter?serverTimezone=UTC
+    username: prospect_app
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8080
+  servlet:
+    session:
+      persistent: false
