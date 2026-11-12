@@ -2,6 +2,10 @@ spring:
   application:
     name: ai-prospect-hunter
 
+  # Lit les variables du fichier .env (ignoré par Git) à la racine du projet
+  config:
+    import: optional:file:.env[.properties]
+
   datasource:
     url: jdbc:mysql://localhost:3308/ai_prospect_hunter?serverTimezone=UTC
     username: prospect_app
