@@ -60,4 +60,25 @@ class ProspectSearchServiceTest {
         assertEquals(10, pageable.getPageSize());
         assertTrue(pageable.getSort().isSorted());
     }
+
+    @Test
+    void shouldClampInvalidPageAndSize() {
+
+        when(prospectRepository.findAll(
+                ArgumentMatchers.<Specification<Prospect>>any(),
+                ArgumentMatchers.<Pageable>any()
+        )).thenReturn(Page.empty());
+
+        // Valeurs qu'un utilisateur pourrait taper dans l'URL : ?page=-3&size=5000
+        prospectSearchService.search(null, null, null, -3, 5000);
+
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(prospectRepository).findAll(
+                ArgumentMatchers.<Specification<Prospect>>any(),
+                captor.capture()
+        );
+
+        assertEquals(0, captor.getValue().getPageNumber());
+        assertEquals(ProspectSearchService.MAX_PAGE_SIZE, captor.getValue().getPageSize());
+    }
 }

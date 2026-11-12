@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Introuvable')}"></head>
+
+<body class="bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5 text-center">
+                    <i class="bi bi-search display-4 text-secondary"></i>
+                    <h1 class="h3 mt-3">Oups !</h1>
+                    <p class="text-secondary" th:text="${errorMessage}">Élément introuvable.</p>
+                    <a th:href="@{/prospects}" class="btn btn-primary">Retour à la liste</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

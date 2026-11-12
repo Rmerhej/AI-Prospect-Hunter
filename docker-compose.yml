@@ -9,7 +9,8 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     ports:
-      - "3308:3306"
+      # 127.0.0.1 : MySQL accessible uniquement depuis votre PC, pas depuis le réseau
+      - "127.0.0.1:3308:3306"
     volumes:
       - prospect-mysql-data:/var/lib/mysql
     healthcheck:
