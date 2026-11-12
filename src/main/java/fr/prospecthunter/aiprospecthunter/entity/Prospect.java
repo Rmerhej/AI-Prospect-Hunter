@@ -3,6 +3,8 @@ package fr.prospecthunter.aiprospecthunter.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import jakarta.validation.constraints.NotBlank;
+import fr.prospecthunter.aiprospecthunter.enums.StatutFinancement;
+import fr.prospecthunter.aiprospecthunter.enums.HorizonProjet;
 @Entity
 @Table(name = "prospects")
 public class Prospect {
@@ -36,6 +38,13 @@ public class Prospect {
 
     private String status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatutFinancement statutFinancement = StatutFinancement.NON_IDENTIFIE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private HorizonProjet horizonProjet = HorizonProjet.LONG_TERME;
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
@@ -135,5 +144,21 @@ public class Prospect {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public StatutFinancement getStatutFinancement() {
+        return statutFinancement;
+    }
+
+    public void setStatutFinancement(StatutFinancement statutFinancement) {
+        this.statutFinancement = statutFinancement;
+    }
+
+    public HorizonProjet getHorizonProjet() {
+        return horizonProjet;
+    }
+
+    public void setHorizonProjet(HorizonProjet horizonProjet) {
+        this.horizonProjet = horizonProjet;
     }
 }

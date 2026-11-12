@@ -70,6 +70,22 @@
                                        th:field="*{postalCode}">
                             </div>
                         </div>
+                        <div class="mb-3">
+                            <label for="statutFinancement" class="form-label">
+                                Statut du financement
+                            </label>
+
+                            <select id="statutFinancement"
+                                    th:field="*{statutFinancement}"
+                                    class="form-select">
+
+                                <option th:each="statut : ${statutsFinancement}"
+                                        th:value="${statut}"
+                                        th:text="${statut.libelle}">
+                                </option>
+
+                            </select>
+                        </div>
 
                         <div class="mb-3">
                             <label class="form-label">Secteur d'activité</label>
@@ -78,6 +94,22 @@
                                 <option value="Association">Association</option>
                                 <option value="Formation">Organisme de formation</option>
                                 <option value="Autre">Autre</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="horizonProjet" class="form-label">
+                                Horizon du projet
+                            </label>
+
+                            <select id="horizonProjet"
+                                    th:field="*{horizonProjet}"
+                                    class="form-select">
+
+                                <option th:each="horizon : ${horizonsProjet}"
+                                        th:value="${horizon}"
+                                        th:text="${horizon.libelle}">
+                                </option>
+
                             </select>
                         </div>
 
