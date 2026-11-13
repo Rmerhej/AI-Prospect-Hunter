@@ -24,3 +24,9 @@ server:
   servlet:
     session:
       persistent: false
+
+# API publique Recherche d'entreprises (gratuite, sans clé)
+prospect-hunter:
+  api:
+    recherche-entreprises:
+      base-url: https://recherche-entreprises.api.gouv.fr

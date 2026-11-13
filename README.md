@@ -10,6 +10,7 @@ Projet personnel d'apprentissage : Spring Boot full stack, puis intégration d'u
 - Score automatique (0 à 100) et qualification : *Prioritaire*, *À étudier*, *Faible potentiel*
 - Recherche multicritère (nom, ville, qualification) avec pagination, via Spring Data JPA Specifications
 - Suivi commercial : statut (À contacter → Contacté → Relancé → A répondu → Client / Perdu), financement, horizon du projet
+- **Import automatique** depuis l'API publique Recherche d'entreprises : organismes de formation, restauration, nettoyage, aide à domicile, de 10 à 49 salariés, dans les Yvelines et les Hauts-de-Seine. Les doublons sont évités grâce au SIREN.
 - Validation des formulaires côté serveur et pages d'erreur claires
 
 ## Stack technique
@@ -19,7 +20,8 @@ Projet personnel d'apprentissage : Spring Boot full stack, puis intégration d'u
 | Back-end | Java 21, Spring Boot 4, Spring Data JPA, Bean Validation |
 | Front-end | Thymeleaf, Bootstrap 5, Bootstrap Icons |
 | Base de données | MySQL 8 (Docker) · H2 pour les tests |
-| Tests | JUnit 5, Mockito, @DataJpaTest |
+| Données | API Recherche d'entreprises (gratuite, sans clé) via `RestClient` |
+| Tests | JUnit 5, Mockito, @DataJpaTest, MockRestServiceServer |
 
 ## Lancer le projet
 
@@ -51,9 +53,13 @@ Les tests utilisent une base H2 en mémoire : MySQL n'a pas besoin de tourner.
 
 - [x] CRUD des prospects, score, statuts
 - [x] Recherche multicritère et pagination
-- [ ] Import automatique d'entreprises via l'API publique Recherche d'entreprises (organismes de formation, restauration, nettoyage, aide à domicile)
+- [x] Import automatique d'entreprises via l'API publique Recherche d'entreprises
 - [ ] Agent IA (Spring AI) pour analyser les prospects et rédiger des brouillons d'e-mails, validés manuellement
 - [ ] Authentification (Spring Security), intégration continue (GitHub Actions)
+
+## Données personnelles
+
+Seules des données publiques d'entreprise sont importées (nom, adresse du siège, activité, effectif). Les noms des dirigeants ne sont pas récupérés. En cas de prospection par e-mail, chaque message doit proposer un moyen simple de s'opposer à la réception de nouveaux messages.
 
 ## Auteur
 

@@ -20,7 +20,12 @@
         <a class="navbar-brand fw-bold" th:href="@{/}">
             <i class="bi bi-crosshair"></i> AI Prospect Hunter
         </a>
-        <a class="nav-link text-white" th:href="@{/prospects}">Mes prospects</a>
+        <div class="d-flex gap-3">
+            <a class="nav-link text-white" th:href="@{/prospects}">Mes prospects</a>
+            <a class="nav-link text-white" th:href="@{/import}">
+                <i class="bi bi-cloud-download"></i> Importer
+            </a>
+        </div>
     </div>
 </nav>
 

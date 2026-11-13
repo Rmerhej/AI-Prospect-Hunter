@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Importer des entreprises')}"></head>
+
+<body class="bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div th:if="${errorMessage}" class="alert alert-warning" role="alert">
+        <i class="bi bi-exclamation-triangle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <div class="mb-4">
+        <h1 class="h3 mb-1">Importer des entreprises</h1>
+        <p class="text-secondary mb-0">
+            Entreprises actives de 10 à 49 salariés, issues de l'Annuaire des entreprises (données publiques).
+        </p>
+    </div>
+
+    <!-- Critères de recherche -->
+    <form th:action="@{/import}" method="get" class="card card-body border-0 shadow-sm mb-4">
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-5">
+                <label for="segment" class="form-label">Cible</label>
+                <select id="segment" name="segment" class="form-select" required>
+                    <option value="">Choisir une cible</option>
+                    <option th:each="s : ${segments}"
+                            th:value="${s}"
+                            th:text="${s.libelle}"
+                            th:selected="${s == segment}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-5">
+                <span class="form-label d-block">Départements</span>
+                <div class="form-check form-check-inline" th:each="d : ${allDepartements}">
+                    <input class="form-check-input" type="checkbox"
+                           name="departements"
+                           th:id="'dep-' + ${d.code}"
+                           th:value="${d}"
+                           th:checked="${#lists.contains(departements, d)}">
+                    <label class="form-check-label"
+                           th:for="'dep-' + ${d.code}"
+                           th:text="${d.libelle} + ' (' + ${d.code} + ')'"></label>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Rechercher
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Résultats.
+         "result" et "c" sont des records Java : on appelle leurs accesseurs avec des parenthèses,
+         par exemple c.siren() (un record n'a pas de getSiren()) -->
+    <div th:if="${result != null}" class="card border-0 shadow-sm">
+        <div class="card-body">
+
+            <div th:if="${#lists.isEmpty(result.candidates())}" class="alert alert-info mb-0">
+                Aucune entreprise trouvée pour ces critères.
+            </div>
+
+            <form th:unless="${#lists.isEmpty(result.candidates())}"
+                  th:action="@{/import}" method="post">
+
+                <!-- Les critères sont renvoyés pour relire la même page dans l'API -->
+                <input type="hidden" name="segment" th:value="${segment}">
+                <input type="hidden" name="page" th:value="${result.page()}">
+                <input type="hidden" name="departements"
+                       th:each="d : ${departements}" th:value="${d}">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-secondary small">
+                        <strong th:text="${result.totalResults()}">0</strong> entreprise(s) —
+                        page <strong th:text="${result.page()}">1</strong>
+                        sur <strong th:text="${result.totalPages()}">1</strong>
+                    </span>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-download"></i> Importer la sélection
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>
+                                <input type="checkbox" class="form-check-input" id="select-all"
+                                       title="Tout cocher">
+                            </th>
+                            <th>Entreprise</th>
+                            <th>Ville</th>
+                            <th>Code postal</th>
+                            <th>Effectif</th>
+                            <th>NAF</th>
+                            <th>Fiche</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="c : ${result.candidates()}"
+                            th:classappend="${c.alreadyImported()} ? 'table-secondary'">
+                            <td>
+                                <input type="checkbox" class="form-check-input company-checkbox"
+                                       name="sirens"
+                                       th:value="${c.siren()}"
+                                       th:disabled="${c.alreadyImported()}"
+                                       th:title="${c.alreadyImported()} ? 'Déjà dans vos prospects' : 'Importer'">
+                            </td>
+                            <td class="fw-semibold">
+                                <span th:text="${c.name()}"></span>
+                                <span th:if="${c.alreadyImported()}" class="badge bg-secondary ms-1">Déjà importé</span>
+                            </td>
+                            <td th:text="${c.city() ?: '-'}"></td>
+                            <td th:text="${c.postalCode() ?: '-'}"></td>
+                            <td th:text="${c.trancheLibelle()}"></td>
+                            <td th:text="${c.codeNaf() ?: '-'}"></td>
+                            <td>
+                                <a th:href="@{https://annuaire-entreprises.data.gouv.fr/entreprise/{siren}(siren=${c.siren()})}"
+                                   target="_blank" rel="noopener noreferrer"
+                                   title="Voir la fiche officielle">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+
+            <!-- Pagination -->
+            <div th:if="${result.totalPages() > 1}" class="d-flex justify-content-end mt-3">
+                <div class="btn-group">
+                    <a th:href="@{/import(segment=${segment}, departements=${departements}, page=${result.page() - 1})}"
+                       th:classappend="${!result.hasPrevious()} ? 'disabled'"
+                       class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-chevron-left"></i> Précédent
+                    </a>
+                    <a th:href="@{/import(segment=${segment}, departements=${departements}, page=${result.page() + 1})}"
+                       th:classappend="${!result.hasNext()} ? 'disabled'"
+                       class="btn btn-outline-primary btn-sm">
+                        Suivant <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <p class="text-secondary small mt-4 mb-0">
+        Seules des données publiques d'entreprise sont récupérées (nom, adresse du siège, activité, effectif).
+        Les noms des dirigeants ne sont pas importés.
+    </p>
+
+</main>
+
+<script th:src="@{/js/import.js}" defer></script>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

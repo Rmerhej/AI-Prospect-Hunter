@@ -21,14 +21,20 @@
                     </h1>
 
                     <p class="lead text-secondary mb-4">
-                        Identifiez les associations et organismes de formation
-                        qui pourraient avoir besoin de solutions numériques.
+                        Identifiez les organismes de formation et les PME à planning
+                        (restauration, nettoyage, aide à domicile) qui ont besoin
+                        d'une application de planning et de présences.
                     </p>
 
                     <a th:href="@{/prospects/nouveau}"
                        class="btn btn-primary btn-lg">
                         <i class="bi bi-plus-circle"></i>
                         Ajouter un prospect
+                    </a>
+                    <a th:href="@{/import}"
+                       class="btn btn-success btn-lg ms-2">
+                        <i class="bi bi-cloud-download"></i>
+                        Importer des entreprises
                     </a>
                     <a th:href="@{/prospects}"
                        class="btn btn-outline-primary btn-lg ms-2">

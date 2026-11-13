@@ -5,6 +5,7 @@ import fr.prospecthunter.aiprospecthunter.entity.Prospect;
 import fr.prospecthunter.aiprospecthunter.enums.HorizonProjet;
 import fr.prospecthunter.aiprospecthunter.enums.ProspectStatus;
 import fr.prospecthunter.aiprospecthunter.enums.StatutFinancement;
+import fr.prospecthunter.aiprospecthunter.enums.TargetSegment;
 import fr.prospecthunter.aiprospecthunter.exception.ProspectNotFoundException;
 import fr.prospecthunter.aiprospecthunter.repository.ProspectRepository;
 import fr.prospecthunter.aiprospecthunter.service.ProspectScoringService;
@@ -43,6 +44,11 @@ public class ProspectController {
     @ModelAttribute("statutsFinancement")
     public StatutFinancement[] statutsFinancement() {
         return StatutFinancement.values();
+    }
+
+    @ModelAttribute("segments")
+    public TargetSegment[] segments() {
+        return TargetSegment.values();
     }
 
     @ModelAttribute("horizonsProjet")

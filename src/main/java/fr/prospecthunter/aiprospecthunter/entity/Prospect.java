@@ -39,6 +39,19 @@ public class Prospect {
 
     private String qualification;
 
+    // ----- Données issues de l'API Recherche d'entreprises (vides pour un prospect saisi à la main) -----
+
+    // unique : empêche d'importer deux fois la même entreprise
+    @Column(unique = true, length = 9)
+    private String siren;
+
+    @Column(length = 10)
+    private String codeNaf;
+
+    // Code INSEE de la tranche d'effectif (ex : "11" = 10 à 19 salariés)
+    @Column(length = 2)
+    private String trancheEffectif;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private ProspectStatus status;
@@ -165,5 +178,29 @@ public class Prospect {
 
     public void setHorizonProjet(HorizonProjet horizonProjet) {
         this.horizonProjet = horizonProjet;
+    }
+
+    public String getSiren() {
+        return siren;
+    }
+
+    public void setSiren(String siren) {
+        this.siren = siren;
+    }
+
+    public String getCodeNaf() {
+        return codeNaf;
+    }
+
+    public void setCodeNaf(String codeNaf) {
+        this.codeNaf = codeNaf;
+    }
+
+    public String getTrancheEffectif() {
+        return trancheEffectif;
+    }
+
+    public void setTrancheEffectif(String trancheEffectif) {
+        this.trancheEffectif = trancheEffectif;
     }
 }

@@ -73,8 +73,11 @@
                             <label class="form-label" for="sector">Secteur d'activité</label>
                             <select class="form-select" th:field="*{sector}">
                                 <option value="">Choisir un secteur</option>
+                                <option th:each="seg : ${segments}"
+                                        th:value="${seg.sector}"
+                                        th:text="${seg.libelle}">
+                                </option>
                                 <option value="Association">Association</option>
-                                <option value="Formation">Organisme de formation</option>
                                 <option value="Autre">Autre</option>
                             </select>
                         </div>
