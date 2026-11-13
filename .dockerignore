@@ -1,0 +1,20 @@
+# Fichiers à NE PAS envoyer à Docker lors du build
+# (plus rapide, et surtout : aucun secret dans l'image)
+.env
+.git
+.gitignore
+.gitattributes
+.idea
+*.iml
+target
+.mvn
+mvnw
+mvnw.cmd
+*.log
+*.patch
+*.zip
+HELP.md
+README.md
+docker-compose.yml
+Dockerfile
+.dockerignore
