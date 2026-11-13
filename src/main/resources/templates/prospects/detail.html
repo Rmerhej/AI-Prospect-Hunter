@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${prospect.name})}"></head>
+
+<body class="bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div th:if="${errorMessage}" class="alert alert-warning" role="alert">
+        <i class="bi bi-exclamation-triangle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- En-tête -->
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h1 class="h3 mb-1" th:text="${prospect.name}">Nom</h1>
+            <span class="badge bg-secondary" th:text="${prospect.sector ?: 'Secteur non défini'}"></span>
+            <span class="badge"
+                  th:classappend="${prospect.qualification == 'Prioritaire'} ? 'bg-success'
+                                 : (${prospect.qualification == 'À étudier'} ? 'bg-warning text-dark' : 'bg-secondary')"
+                  th:text="${prospect.qualification ?: '-'}"></span>
+            <span class="text-secondary small ms-2">
+                Score : <strong th:text="${prospect.score ?: 0}">0</strong>/100
+            </span>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/prospects/modifier/{id}(id=${prospect.id})}" class="btn btn-outline-primary">
+                <i class="bi bi-pencil"></i> Modifier
+            </a>
+            <a th:href="@{/prospects}" class="btn btn-outline-secondary">Retour</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Informations -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">Informations</h2>
+                    <dl class="mb-0 small">
+                        <dt>Ville</dt>
+                        <dd th:text="${prospect.city != null} ? ${prospect.city + ' (' + (prospect.postalCode ?: '-') + ')'} : '-'"></dd>
+
+                        <dt>Effectif</dt>
+                        <dd th:text="${trancheLibelle}"></dd>
+
+                        <dt>Code NAF</dt>
+                        <dd th:text="${prospect.codeNaf ?: '-'}"></dd>
+
+                        <dt>Statut</dt>
+                        <dd th:text="${prospect.status != null} ? ${prospect.status.libelle} : '-'"></dd>
+
+                        <dt>Besoin potentiel</dt>
+                        <dd th:text="${prospect.potentialNeed ?: 'Non identifié'}"></dd>
+
+                        <dt>Description</dt>
+                        <dd style="white-space: pre-line" th:text="${prospect.description ?: '-'}"></dd>
+
+                        <th:block th:if="${prospect.siren != null}">
+                            <dt>SIREN</dt>
+                            <dd>
+                                <a th:href="@{https://annuaire-entreprises.data.gouv.fr/entreprise/{siren}(siren=${prospect.siren})}"
+                                   th:text="${prospect.siren}"
+                                   target="_blank" rel="noopener noreferrer"></a>
+                            </dd>
+                        </th:block>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analyse IA -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="h5 mb-0"><i class="bi bi-stars"></i> Analyse IA</h2>
+
+                        <form th:action="@{/prospects/{id}/analyser(id=${prospect.id})}" method="post"
+                              class="ai-form">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <span class="label-idle">
+                                    <i class="bi bi-magic"></i>
+                                    <span th:text="${prospect.analysedAt == null} ? 'Analyser avec l\'IA' : 'Relancer l\'analyse'">
+                                        Analyser avec l'IA
+                                    </span>
+                                </span>
+                                <span class="label-busy d-none">
+                                    <span class="spinner-border spinner-border-sm"></span> Analyse en cours…
+                                </span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <p th:if="${prospect.analysedAt == null}" class="text-secondary mb-0">
+                        Pas encore analysé. L'IA évalue l'intérêt de l'entreprise pour une application de planning
+                        et de présences, puis prépare un brouillon d'e-mail. Seules des données publiques sont envoyées.
+                    </p>
+
+                    <th:block th:if="${prospect.analysedAt != null}">
+                        <p class="mb-2">
+                            Pertinence :
+                            <span class="badge fs-6"
+                                  th:classappend="${prospect.aiPertinence >= 70} ? 'bg-success'
+                                                 : (${prospect.aiPertinence >= 40} ? 'bg-warning text-dark' : 'bg-secondary')"
+                                  th:text="${prospect.aiPertinence} + ' / 100'"></span>
+                            <span class="text-secondary small ms-2"
+                                  th:text="'Analysé le ' + ${#temporals.format(prospect.analysedAt, 'dd/MM/yyyy à HH:mm')}"></span>
+                        </p>
+
+                        <p style="white-space: pre-line" th:text="${prospect.aiAnalysis}"></p>
+
+                        <div class="alert alert-light border d-flex justify-content-between align-items-center mb-0"
+                             th:if="${prospect.aiProposedNeed != null}">
+                            <div>
+                                <strong>Besoin proposé :</strong>
+                                <span th:text="${prospect.aiProposedNeed}"></span>
+                            </div>
+                            <form th:if="${prospect.aiProposedNeed != prospect.potentialNeed}"
+                                  th:action="@{/prospects/{id}/appliquer-besoin(id=${prospect.id})}" method="post">
+                                <button type="submit" class="btn btn-sm btn-outline-success text-nowrap ms-2">
+                                    <i class="bi bi-check2"></i> Utiliser ce besoin
+                                </button>
+                            </form>
+                            <span th:unless="${prospect.aiProposedNeed != prospect.potentialNeed}"
+                                  class="badge bg-success ms-2">Retenu</span>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
+
+            <!-- Brouillon d'e-mail -->
+            <div class="card border-0 shadow-sm" th:if="${prospect.analysedAt != null}">
+                <div class="card-body">
+                    <h2 class="h5 mb-1"><i class="bi bi-envelope"></i> Brouillon d'e-mail</h2>
+                    <p class="text-secondary small">
+                        Relisez et corrigez avant tout envoi. Rien n'est envoyé automatiquement.
+                    </p>
+
+                    <form th:action="@{/prospects/{id}/brouillon(id=${prospect.id})}"
+                          th:object="${draft}" method="post" novalidate>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="subject">Objet</label>
+                            <input type="text" class="form-control" th:field="*{subject}"
+                                   th:errorclass="is-invalid">
+                            <div class="invalid-feedback" th:errors="*{subject}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="body">Message</label>
+                            <textarea class="form-control" rows="14" th:field="*{body}"
+                                      th:errorclass="is-invalid"></textarea>
+                            <div class="invalid-feedback" th:errors="*{body}"></div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Enregistrer
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="copy-email">
+                                <i class="bi bi-clipboard"></i> <span>Copier l'e-mail</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script th:src="@{/js/detail.js}" defer></script>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

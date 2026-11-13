@@ -95,7 +95,13 @@
                     <tbody>
                     <tr th:each="prospect : ${prospects}">
 
-                        <td class="fw-semibold" th:text="${prospect.name}"></td>
+                        <td class="fw-semibold">
+                            <a th:href="@{/prospects/{id}(id=${prospect.id})}"
+                               th:text="${prospect.name}"
+                               class="text-decoration-none"></a>
+                            <i th:if="${prospect.analysedAt != null}" class="bi bi-stars text-primary"
+                               title="Analysé par l'IA"></i>
+                        </td>
 
                         <td th:text="${prospect.city ?: '-'}"></td>
 
