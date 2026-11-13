@@ -20,30 +20,41 @@ Projet personnel d'apprentissage : Spring Boot full stack, puis intégration d'u
 |---|---|
 | Back-end | Java 21, Spring Boot 4, Spring Data JPA, Bean Validation |
 | Front-end | Thymeleaf, Bootstrap 5, Bootstrap Icons |
-| Base de données | MySQL 8 (Docker) · H2 pour les tests |
+| Base de données | MySQL 8 · H2 pour les tests |
+| Déploiement | Docker : image multi-étapes (JDK pour compiler, JRE pour exécuter), Docker Compose |
 | IA | Spring AI 2.0, Gemini (`gemini-2.5-flash`) |
 | Données | API Recherche d'entreprises (gratuite, sans clé) via `RestClient` |
 | Tests | JUnit 5, Mockito, @DataJpaTest, MockRestServiceServer |
 
 ## Lancer le projet
 
-Prérequis : Java 21, Docker (par exemple Docker Engine dans WSL).
+Prérequis : Docker (par exemple Docker Engine dans WSL). Java 21 n'est nécessaire que pour développer.
 
 ```bash
 # 1. Créer le fichier de secrets (non versionné)
 cp .env.example .env
 # puis modifier les mots de passe dans .env
-
 # puis ajouter votre clé Gemini (GEMINI_API_KEY), créée sur https://aistudio.google.com/apikey
-
-# 2. Démarrer MySQL
-docker compose up -d
-
-# 3. Lancer l'application
-./mvnw spring-boot:run
 ```
 
-Ouvrir ensuite http://localhost:8080
+### Option A : tout dans Docker (application + base)
+
+```bash
+docker compose up -d --build     # construit l'image puis démarre MySQL et l'application
+docker compose logs -f app       # suivre les logs (Ctrl+C pour quitter)
+docker compose down              # tout arrêter (les données MySQL sont conservées)
+```
+
+Ouvrir ensuite http://localhost:8080. Après une modification du code, relancer `docker compose up -d --build`.
+
+### Option B : développement (base dans Docker, application dans IntelliJ)
+
+```bash
+docker compose up -d prospect-db # uniquement MySQL
+./mvnw spring-boot:run           # ou le bouton Run d'IntelliJ
+```
+
+Ne lancez pas les deux options en même temps : elles utilisent toutes les deux le port 8080.
 
 ## Lancer les tests
 
@@ -59,6 +70,7 @@ Les tests utilisent une base H2 en mémoire : MySQL n'a pas besoin de tourner.
 - [x] Recherche multicritère et pagination
 - [x] Import automatique d'entreprises via l'API publique Recherche d'entreprises
 - [x] Agent IA (Spring AI + Gemini) pour analyser les prospects et rédiger des brouillons d'e-mails, validés manuellement
+- [x] Application et base de données dans Docker (Docker Compose)
 - [ ] Authentification (Spring Security), intégration continue (GitHub Actions)
 
 ## Données personnelles
