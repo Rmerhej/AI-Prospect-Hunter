@@ -11,6 +11,20 @@ spring:
     username: prospect_app
     password: ${DB_PASSWORD}
 
+  # ----- Agent IA : Gemini via Spring AI -----
+  ai:
+    google:
+      genai:
+        # Avec une clé API, Spring AI utilise l'API Gemini "développeur" (pas Vertex AI)
+        api-key: ${prospect-hunter.ai.api-key}
+        chat:
+          model: ${GEMINI_MODEL:gemini-3.1-flash-lite}
+          # Faible "créativité" : des réponses plus factuelles et plus régulières
+          temperature: 0.3
+    retry:
+      # 10 tentatives par défaut : trop long si la clé est fausse ou si la limite est atteinte
+      max-attempts: 2
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -27,6 +41,18 @@ server:
 
 # API publique Recherche d'entreprises (gratuite, sans clé)
 prospect-hunter:
+  ai:
+    # Clé lue dans le fichier .env (GEMINI_API_KEY). Valeur par défaut : l'application démarre
+    # sans clé, et la fiche prospect affiche un message clair au lieu de planter.
+    api-key: ${GEMINI_API_KEY:a-configurer}
+
   api:
     recherche-entreprises:
       base-url: https://recherche-entreprises.api.gouv.fr
+
+  # Signature ajoutée automatiquement à chaque brouillon d'e-mail
+  signature:
+    nom: Roland Merhej
+    titre: Développeur d'applications web (titre professionnel CDA)
+    ville: Chatou
+    lien: https://www.linkedin.com/in/rolandmerhej

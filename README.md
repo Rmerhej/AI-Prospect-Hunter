@@ -11,6 +11,7 @@ Projet personnel d'apprentissage : Spring Boot full stack, puis intégration d'u
 - Recherche multicritère (nom, ville, qualification) avec pagination, via Spring Data JPA Specifications
 - Suivi commercial : statut (À contacter → Contacté → Relancé → A répondu → Client / Perdu), financement, horizon du projet
 - **Import automatique** depuis l'API publique Recherche d'entreprises : organismes de formation, restauration, nettoyage, aide à domicile, de 10 à 49 salariés, dans les Yvelines et les Hauts-de-Seine. Les doublons sont évités grâce au SIREN.
+- **Agent IA (Gemini via Spring AI)** : sur la fiche d'un prospect, l'IA évalue sa pertinence (0 à 100), explique pourquoi, propose un besoin et rédige un brouillon d'e-mail. Vous validez le besoin et corrigez l'e-mail : rien n'est envoyé automatiquement. La signature et la mention d'opposition sont ajoutées par le code.
 - Validation des formulaires côté serveur et pages d'erreur claires
 
 ## Stack technique
@@ -20,6 +21,7 @@ Projet personnel d'apprentissage : Spring Boot full stack, puis intégration d'u
 | Back-end | Java 21, Spring Boot 4, Spring Data JPA, Bean Validation |
 | Front-end | Thymeleaf, Bootstrap 5, Bootstrap Icons |
 | Base de données | MySQL 8 (Docker) · H2 pour les tests |
+| IA | Spring AI 2.0, Gemini (`gemini-2.5-flash`) |
 | Données | API Recherche d'entreprises (gratuite, sans clé) via `RestClient` |
 | Tests | JUnit 5, Mockito, @DataJpaTest, MockRestServiceServer |
 
@@ -31,6 +33,8 @@ Prérequis : Java 21, Docker (par exemple Docker Engine dans WSL).
 # 1. Créer le fichier de secrets (non versionné)
 cp .env.example .env
 # puis modifier les mots de passe dans .env
+
+# puis ajouter votre clé Gemini (GEMINI_API_KEY), créée sur https://aistudio.google.com/apikey
 
 # 2. Démarrer MySQL
 docker compose up -d
@@ -54,12 +58,18 @@ Les tests utilisent une base H2 en mémoire : MySQL n'a pas besoin de tourner.
 - [x] CRUD des prospects, score, statuts
 - [x] Recherche multicritère et pagination
 - [x] Import automatique d'entreprises via l'API publique Recherche d'entreprises
-- [ ] Agent IA (Spring AI) pour analyser les prospects et rédiger des brouillons d'e-mails, validés manuellement
+- [x] Agent IA (Spring AI + Gemini) pour analyser les prospects et rédiger des brouillons d'e-mails, validés manuellement
 - [ ] Authentification (Spring Security), intégration continue (GitHub Actions)
 
 ## Données personnelles
 
 Seules des données publiques d'entreprise sont importées (nom, adresse du siège, activité, effectif). Les noms des dirigeants ne sont pas récupérés. En cas de prospection par e-mail, chaque message doit proposer un moyen simple de s'opposer à la réception de nouveaux messages.
+
+### IA et confidentialité
+
+L'application n'envoie à l'IA que des données publiques d'entreprise (nom, secteur, ville, effectif, code NAF). Avec une offre gratuite, les requêtes peuvent servir à améliorer les modèles du fournisseur : n'y ajoutez jamais de données personnelles ou confidentielles.
+
+Pour changer de fournisseur (Mistral, Ollama…), il suffit de remplacer le starter Spring AI dans `pom.xml` et les lignes `spring.ai` de `application.yml` : le code (`ChatClientProspectAnalyzer`) ne change pas.
 
 ## Auteur
 

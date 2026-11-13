@@ -52,6 +52,26 @@ public class Prospect {
     @Column(length = 2)
     private String trancheEffectif;
 
+    // ----- Analyse IA (vide tant que l'analyse n'a pas été lancée) -----
+
+    // Note de 0 à 100 donnée par l'IA (distincte du score "règles simples")
+    private Integer aiPertinence;
+
+    @Column(length = 2000)
+    private String aiAnalysis;
+
+    // Besoin proposé par l'IA : il ne remplace "potentialNeed" que si vous le validez
+    @Column(length = 1000)
+    private String aiProposedNeed;
+
+    @Column(length = 200)
+    private String emailSubject;
+
+    @Column(length = 4000)
+    private String emailDraft;
+
+    private LocalDateTime analysedAt;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private ProspectStatus status;
@@ -202,5 +222,53 @@ public class Prospect {
 
     public void setTrancheEffectif(String trancheEffectif) {
         this.trancheEffectif = trancheEffectif;
+    }
+
+    public Integer getAiPertinence() {
+        return aiPertinence;
+    }
+
+    public void setAiPertinence(Integer aiPertinence) {
+        this.aiPertinence = aiPertinence;
+    }
+
+    public String getAiAnalysis() {
+        return aiAnalysis;
+    }
+
+    public void setAiAnalysis(String aiAnalysis) {
+        this.aiAnalysis = aiAnalysis;
+    }
+
+    public String getAiProposedNeed() {
+        return aiProposedNeed;
+    }
+
+    public void setAiProposedNeed(String aiProposedNeed) {
+        this.aiProposedNeed = aiProposedNeed;
+    }
+
+    public String getEmailSubject() {
+        return emailSubject;
+    }
+
+    public void setEmailSubject(String emailSubject) {
+        this.emailSubject = emailSubject;
+    }
+
+    public String getEmailDraft() {
+        return emailDraft;
+    }
+
+    public void setEmailDraft(String emailDraft) {
+        this.emailDraft = emailDraft;
+    }
+
+    public LocalDateTime getAnalysedAt() {
+        return analysedAt;
+    }
+
+    public void setAnalysedAt(LocalDateTime analysedAt) {
+        this.analysedAt = analysedAt;
     }
 }
