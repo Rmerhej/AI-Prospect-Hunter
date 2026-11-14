@@ -8,6 +8,8 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Locale;
+
 /**
  * Analyse un prospect avec le modèle d'IA configuré (Gemini actuellement), via le ChatClient de Spring AI.
  * Cette classe ne dépend d'aucun fournisseur : le ChatClient est fourni par le "starter" présent dans le pom.xml.
@@ -75,9 +77,7 @@ public class ChatClientProspectAnalyzer implements ProspectAnalyzer {
         } catch (RuntimeException e) {
             // On garde le détail technique dans les logs, et un message simple pour l'utilisateur
             log.warn("Échec de l'analyse IA du prospect {}", prospect.getId(), e);
-            throw new AiUnavailableException(
-                    "L'IA n'a pas pu analyser ce prospect (clé invalide, limite gratuite atteinte ou service "
-                            + "indisponible). Réessayez dans un instant.", e);
+            throw new AiUnavailableException(describeFailure(e, apiKey), e);
         }
 
         if (analysis == null || isBlank(analysis.analyse()) || isBlank(analysis.corpsEmail())) {
@@ -128,5 +128,67 @@ public class ChatClientProspectAnalyzer implements ProspectAnalyzer {
 
     private static boolean isBlank(String value) {
         return value == null || value.isBlank();
+    }
+
+    // ----- Message d'erreur affiché sur la fiche prospect -----
+
+    /**
+     * Traduit une erreur technique en message utile : la cause probable, un conseil,
+     * et le détail technique (sans jamais afficher la clé API).
+     */
+    static String describeFailure(Throwable error, String apiKey) {
+        String detail = rootMessage(error);
+        String d = detail.toLowerCase(Locale.ROOT);
+
+        String hint;
+        if (d.contains("429") || d.contains("resource_exhausted") || d.contains("quota")) {
+            hint = "Limite gratuite atteinte : patientez une minute (ou jusqu'à demain pour la limite quotidienne).";
+        } else if (d.contains("503") || d.contains("overloaded") || d.contains("high demand")
+                || d.contains("unavailable")) {
+            hint = "Le modèle est saturé : réessayez dans quelques minutes ou changez GEMINI_MODEL dans .env.";
+        } else if (d.contains("401") || d.contains("403") || d.contains("api key") || d.contains("api_key")
+                || d.contains("permission")) {
+            hint = "Clé API refusée : vérifiez GEMINI_API_KEY dans .env.";
+        } else if (d.contains("404") || d.contains("no longer available") || d.contains("not found")) {
+            hint = "Modèle introuvable ou retiré : changez GEMINI_MODEL dans .env.";
+        } else if (d.contains("timed out") || d.contains("timeout") || d.contains("unknownhost")
+                || d.contains("connection")) {
+            hint = "Le service ne répond pas : vérifiez votre connexion Internet.";
+        } else if (d.contains("json") || d.contains("deserializ") || d.contains("parse")) {
+            hint = "La réponse de l'IA est illisible : relancez l'analyse.";
+        } else {
+            hint = "Erreur inattendue : consultez les logs de l'application.";
+        }
+
+        return "L'IA n'a pas pu analyser ce prospect. " + hint
+                + " Détail technique : " + redact(truncate(detail, 300), apiKey);
+    }
+
+    /** Le message de la cause la plus profonde, ou le nom de l'exception s'il n'y a pas de message. */
+    static String rootMessage(Throwable error) {
+        String message = null;
+        Throwable current = error;
+        while (current != null) {
+            if (current.getMessage() != null && !current.getMessage().isBlank()) {
+                message = current.getClass().getSimpleName() + " : " + current.getMessage();
+            }
+            current = current.getCause() == current ? null : current.getCause();
+        }
+        return message != null ? message.strip() : error.getClass().getSimpleName();
+    }
+
+    /** Masque la clé API si elle apparaît dans un message d'erreur (dans une URL, par exemple). */
+    static String redact(String text, String apiKey) {
+        String result = text;
+        if (apiKey != null && apiKey.length() >= 8) {
+            result = result.replace(apiKey, "***");
+        }
+        return result
+                .replaceAll("(?i)(key=)[^&\\s\"]+", "$1***")
+                .replaceAll("AIza[0-9A-Za-z_\\-]{20,}", "***");
+    }
+
+    private static String truncate(String value, int max) {
+        return value.length() <= max ? value : value.substring(0, max) + "…";
     }
 }

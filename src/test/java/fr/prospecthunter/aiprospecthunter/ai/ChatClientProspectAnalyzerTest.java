@@ -63,4 +63,70 @@ class ChatClientProspectAnalyzerTest {
         assertTrue(e.getMessage().contains("GEMINI_API_KEY"));
         verifyNoInteractions(chatClient);
     }
+
+    // ----- Messages d'erreur affichés sur la fiche -----
+
+    @Test
+    void erreur503DonneUnConseilSurLeModele() {
+        RuntimeException error = new RuntimeException("Échec",
+                new IllegalStateException("503 Service Unavailable. The model is overloaded due to high demand."));
+
+        String message = ChatClientProspectAnalyzer.describeFailure(error, "cle-quelconque");
+
+        assertTrue(message.contains("saturé"));
+        assertTrue(message.contains("GEMINI_MODEL"));
+        assertTrue(message.contains("503"), "Le détail technique est conservé");
+    }
+
+    @Test
+    void erreur404DonneUnConseilSurLeModele() {
+        String message = ChatClientProspectAnalyzer.describeFailure(
+                new RuntimeException("404 . This model models/x is no longer available to new users."), "cle");
+
+        assertTrue(message.contains("Modèle introuvable"));
+    }
+
+    @Test
+    void erreur429DonneUnConseilSurLaLimite() {
+        String message = ChatClientProspectAnalyzer.describeFailure(
+                new RuntimeException("429 RESOURCE_EXHAUSTED: quota exceeded"), "cle");
+
+        assertTrue(message.contains("Limite gratuite"));
+    }
+
+    @Test
+    void cleInvalideDonneUnConseilSurLaCle() {
+        String message = ChatClientProspectAnalyzer.describeFailure(
+                new RuntimeException("400 INVALID_ARGUMENT: API key not valid. Please pass a valid API key."), "cle");
+
+        assertTrue(message.contains("GEMINI_API_KEY"));
+    }
+
+    @Test
+    void laCleNApparaitJamaisDansLeMessage() {
+        String key = "AIzaSyDUMMYDUMMYDUMMYDUMMYDUMMY123";
+        RuntimeException error = new RuntimeException(
+                "Erreur sur https://api.test/v1/models?key=" + key + "&alt=json");
+
+        String message = ChatClientProspectAnalyzer.describeFailure(error, key);
+
+        assertFalse(message.contains(key));
+        assertTrue(message.contains("key=***"));
+    }
+
+    @Test
+    void uneCleGoogleInconnueEstAussiMasquee() {
+        String message = ChatClientProspectAnalyzer.redact(
+                "Clé AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ012345 refusée", "autre-cle");
+
+        assertFalse(message.contains("AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ012345"));
+    }
+
+    @Test
+    void leMessageLePlusProfondEstRetenu() {
+        RuntimeException error = new RuntimeException("Enveloppe",
+                new IllegalArgumentException("Vraie cause"));
+
+        assertEquals("IllegalArgumentException : Vraie cause", ChatClientProspectAnalyzer.rootMessage(error));
+    }
 }

@@ -25,6 +25,15 @@
             <a class="nav-link text-white" th:href="@{/import}">
                 <i class="bi bi-cloud-download"></i> Importer
             </a>
+            <a class="nav-link text-white" th:href="@{/tableau-de-bord}">
+                <i class="bi bi-bar-chart"></i> Tableau de bord
+            </a>
+            <!-- Déconnexion en POST (avec jeton CSRF) : un simple lien ne suffit pas -->
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-light" title="Se déconnecter">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </form>
         </div>
     </div>
 </nav>

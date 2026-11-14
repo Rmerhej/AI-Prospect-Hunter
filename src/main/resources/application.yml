@@ -25,9 +25,17 @@ spring:
       # 10 tentatives par défaut : trop long si la clé est fausse ou si la limite est atteinte
       max-attempts: 2
 
+  # ----- Migrations : c'est Flyway, et non plus Hibernate, qui crée et modifie les tables -----
+  flyway:
+    # Base existante (créée par Hibernate) : Flyway la marque "version 1" sans rejouer V1
+    baseline-on-migrate: true
+    baseline-version: 1
+
   jpa:
     hibernate:
-      ddl-auto: update
+      # none : Hibernate ne touche plus au schéma. Toute modification passe par un fichier
+      # db/migration/V2__..., V3__... (versionné, rejouable, relu en Pull Request)
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
@@ -49,6 +57,11 @@ prospect-hunter:
   api:
     recherche-entreprises:
       base-url: https://recherche-entreprises.api.gouv.fr
+
+  # Connexion à l'application (lus dans .env)
+  security:
+    username: ${APP_USERNAME:roland}
+    password: ${APP_PASSWORD:}
 
   # Signature ajoutée automatiquement à chaque brouillon d'e-mail
   signature:
