@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Connexion')}"></head>
+
+<body class="bg-light">
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+
+            <div class="text-center mb-4">
+                <i class="bi bi-crosshair display-5 text-primary"></i>
+                <h1 class="h4 mt-2">AI Prospect Hunter</h1>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <div th:if="${param.error}" class="alert alert-danger py-2" role="alert">
+                        Identifiant ou mot de passe incorrect.
+                    </div>
+                    <div th:if="${param.logout}" class="alert alert-success py-2" role="alert">
+                        Vous êtes déconnecté.
+                    </div>
+
+                    <!-- th:action ajoute automatiquement le jeton CSRF caché -->
+                    <form th:action="@{/login}" method="post">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Identifiant</label>
+                            <input type="text" id="username" name="username" class="form-control"
+                                   autocomplete="username" required autofocus>
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Mot de passe</label>
+                            <input type="password" id="password" name="password" class="form-control"
+                                   autocomplete="current-password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-box-arrow-in-right"></i> Se connecter
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

@@ -1,5 +1,7 @@
 # AI Prospect Hunter
 
+[![CI](https://github.com/Rmerhej/AI-Prospect-Hunter/actions/workflows/ci.yml/badge.svg)](https://github.com/Rmerhej/AI-Prospect-Hunter/actions/workflows/ci.yml)
+
 Application web de prospection : identifier, qualifier et suivre des organismes susceptibles d'avoir besoin d'une application sur mesure (planning, présences, émargement…).
 
 Projet personnel d'apprentissage : Spring Boot full stack, puis intégration d'un agent IA.
@@ -12,7 +14,9 @@ Projet personnel d'apprentissage : Spring Boot full stack, puis intégration d'u
 - Suivi commercial : statut (À contacter → Contacté → Relancé → A répondu → Client / Perdu), financement, horizon du projet
 - **Import automatique** depuis l'API publique Recherche d'entreprises : organismes de formation, restauration, nettoyage, aide à domicile, de 10 à 49 salariés, dans les Yvelines et les Hauts-de-Seine. Les doublons sont évités grâce au SIREN.
 - **Agent IA (Gemini via Spring AI)** : sur la fiche d'un prospect, l'IA évalue sa pertinence (0 à 100), explique pourquoi, propose un besoin et rédige un brouillon d'e-mail. Vous validez le besoin et corrigez l'e-mail : rien n'est envoyé automatiquement. La signature et la mention d'opposition sont ajoutées par le code.
-- Validation des formulaires côté serveur et pages d'erreur claires
+- **Tableau de bord** : prospects par statut, secteur et qualification, taux de réponse et de conversion.
+- **Connexion sécurisée** (Spring Security) : toutes les pages demandent un identifiant et un mot de passe, protection CSRF sur tous les formulaires.
+- Validation des formulaires côté serveur et pages d'erreur claires (y compris la cause des erreurs de l'IA, sans jamais afficher la clé API)
 
 ## Stack technique
 
@@ -20,8 +24,10 @@ Projet personnel d'apprentissage : Spring Boot full stack, puis intégration d'u
 |---|---|
 | Back-end | Java 21, Spring Boot 4, Spring Data JPA, Bean Validation |
 | Front-end | Thymeleaf, Bootstrap 5, Bootstrap Icons |
-| Base de données | MySQL 8 · H2 pour les tests |
+| Base de données | MySQL 8 · migrations Flyway · H2 pour les tests |
+| Sécurité | Spring Security (connexion par formulaire, BCrypt, CSRF) |
 | Déploiement | Docker : image multi-étapes (JDK pour compiler, JRE pour exécuter), Docker Compose |
+| Intégration continue | GitHub Actions : tests + construction de l'image Docker à chaque push et Pull Request |
 | IA | Spring AI 2.0, Gemini (`gemini-2.5-flash`) |
 | Données | API Recherche d'entreprises (gratuite, sans clé) via `RestClient` |
 | Tests | JUnit 5, Mockito, @DataJpaTest, MockRestServiceServer |
@@ -35,6 +41,7 @@ Prérequis : Docker (par exemple Docker Engine dans WSL). Java 21 n'est nécessa
 cp .env.example .env
 # puis modifier les mots de passe dans .env
 # puis ajouter votre clé Gemini (GEMINI_API_KEY), créée sur https://aistudio.google.com/apikey
+# et vos identifiants de connexion (APP_USERNAME, APP_PASSWORD : 8 caractères minimum)
 ```
 
 ### Option A : tout dans Docker (application + base)
@@ -71,7 +78,14 @@ Les tests utilisent une base H2 en mémoire : MySQL n'a pas besoin de tourner.
 - [x] Import automatique d'entreprises via l'API publique Recherche d'entreprises
 - [x] Agent IA (Spring AI + Gemini) pour analyser les prospects et rédiger des brouillons d'e-mails, validés manuellement
 - [x] Application et base de données dans Docker (Docker Compose)
-- [ ] Authentification (Spring Security), intégration continue (GitHub Actions)
+- [x] Tableau de bord et messages d'erreur IA explicites
+- [x] Authentification (Spring Security), migrations (Flyway), intégration continue (GitHub Actions)
+
+## Base de données et migrations
+
+Le schéma est géré par **Flyway** (`src/main/resources/db/migration`) et non plus par Hibernate (`ddl-auto: none`).
+Pour faire évoluer une table, ajoutez un nouveau fichier `V2__description.sql`, `V3__…` : ne modifiez jamais une migration déjà appliquée.
+Une base créée avant Flyway est automatiquement marquée « version 1 » au premier démarrage.
 
 ## Données personnelles
 
