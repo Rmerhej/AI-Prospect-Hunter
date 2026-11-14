@@ -100,3 +100,10 @@ Pour changer de fournisseur (Mistral, Ollama…), il suffit de remplacer le star
 ## Auteur
 
 Roland Merhej — [LinkedIn](https://www.linkedin.com/in/rolandmerhej)
+## License and Copyright
+
+Copyright © 2026 Roland Merhej.
+All rights reserved.
+
+Source code is publicly available for review.
+See COPYRIGHT.md for usage restrictions.
