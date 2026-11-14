@@ -34,7 +34,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", false)
+                        // true : toujours revenir à l'accueil après la connexion.
+                        // Sinon Spring renvoie vers la dernière adresse demandée avant la connexion,
+                        // qui peut être une requête automatique du navigateur (/favicon.ico,
+                        // /.well-known/..., /error) au lieu d'une vraie page : d'où une page d'erreur.
+                        .defaultSuccessUrl("/", true)
                         .permitAll())
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login?logout")
