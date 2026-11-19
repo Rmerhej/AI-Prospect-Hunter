@@ -5,9 +5,9 @@ package fr.prospecthunter.aiprospecthunter.ai;
  * Spring AI demande au modèle de répondre en JSON avec exactement ces champs,
  * puis convertit ce JSON en record Java (méthode .entity(AiAnalysis.class)).
  *
- * @param pertinence      0 à 100 : probabilité que l'entreprise ait besoin d'une app de planning / présences
+ * @param pertinence      0 à 100 : besoin probable d'une app (prospection) ou adéquation avec votre profil (emploi)
  * @param analyse         3 à 5 phrases qui expliquent la note
- * @param besoinPotentiel une phrase décrivant le besoin le plus probable
+ * @param besoinPotentiel une phrase : le besoin le plus probable (prospection) ou le poste le plus plausible (emploi)
  * @param objetEmail      objet du brouillon d'e-mail
  * @param corpsEmail      corps du brouillon (sans signature ni mention de désinscription)
  */

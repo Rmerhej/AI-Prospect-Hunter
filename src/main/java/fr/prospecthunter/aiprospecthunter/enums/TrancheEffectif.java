@@ -10,6 +10,9 @@ public final class TrancheEffectif {
     /** Tranches visées : de 10 à 49 salariés. */
     public static final String CIBLES = "11,12";
 
+    /** Tranches visées en recherche d'emploi : de 10 à 499 salariés. */
+    public static final String EMPLOI = "11,12,21,22,31,32";
+
     private static final Map<String, String> LIBELLES = Map.ofEntries(
             Map.entry("00", "0 salarié"),
             Map.entry("01", "1 à 2 salariés"),
@@ -42,6 +45,11 @@ public final class TrancheEffectif {
     /** Vrai pour les tranches 10-19 et 20-49 salariés. */
     public static boolean estCible(String code) {
         return "11".equals(code) || "12".equals(code);
+    }
+
+    /** Vrai pour les tranches de 10 à 499 salariés (recherche d'emploi). */
+    public static boolean estCibleEmploi(String code) {
+        return code != null && java.util.Arrays.asList(EMPLOI.split(",")).contains(code);
     }
 
     /** Vrai pour la tranche 50-99 salariés : encore intéressante, mais moins prioritaire. */

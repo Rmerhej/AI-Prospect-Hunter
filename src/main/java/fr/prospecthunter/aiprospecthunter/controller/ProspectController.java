@@ -3,6 +3,7 @@ package fr.prospecthunter.aiprospecthunter.controller;
 import fr.prospecthunter.aiprospecthunter.dto.ProspectForm;
 import fr.prospecthunter.aiprospecthunter.entity.Prospect;
 import fr.prospecthunter.aiprospecthunter.enums.HorizonProjet;
+import fr.prospecthunter.aiprospecthunter.enums.ProspectMode;
 import fr.prospecthunter.aiprospecthunter.enums.ProspectStatus;
 import fr.prospecthunter.aiprospecthunter.enums.StatutFinancement;
 import fr.prospecthunter.aiprospecthunter.enums.TargetSegment;
@@ -51,6 +52,11 @@ public class ProspectController {
         return TargetSegment.values();
     }
 
+    @ModelAttribute("modes")
+    public ProspectMode[] modes() {
+        return ProspectMode.values();
+    }
+
     @ModelAttribute("horizonsProjet")
     public HorizonProjet[] horizonsProjet() {
         return HorizonProjet.values();
@@ -63,23 +69,25 @@ public class ProspectController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String qualification,
+            @RequestParam(required = false) ProspectMode mode,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model) {
 
-        Page<Prospect> prospects = prospectSearchService.search(name, city, qualification, page, size);
+        Page<Prospect> prospects = prospectSearchService.search(name, city, qualification, mode, page, size);
 
         model.addAttribute("prospects", prospects);
         model.addAttribute("name", name);
         model.addAttribute("city", city);
         model.addAttribute("qualification", qualification);
+        model.addAttribute("mode", mode);
         // Valeurs corrigées par le service (page négative, taille trop grande...)
         model.addAttribute("currentPage", prospects.getNumber());
         model.addAttribute("pageSize", prospects.getSize());
         model.addAttribute("totalPages", prospects.getTotalPages());
         model.addAttribute("totalItems", prospects.getTotalElements());
         // Vrai si au moins un filtre est rempli : sert à adapter le message "aucun résultat"
-        model.addAttribute("hasFilters", isFilled(name) || isFilled(city) || isFilled(qualification));
+        model.addAttribute("hasFilters", isFilled(name) || isFilled(city) || isFilled(qualification) || mode != null);
 
         return "prospects/list";
     }

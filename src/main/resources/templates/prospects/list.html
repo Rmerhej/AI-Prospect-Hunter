@@ -15,6 +15,7 @@
             <h1 class="h3 mb-1">Mes prospects</h1>
             <p class="text-secondary mb-0">
                 Retrouvez les organismes enregistrés, triés par score.
+                <i class="bi bi-briefcase text-success"></i> = employeur (recherche d'emploi).
             </p>
         </div>
 
@@ -27,18 +28,29 @@
     <form th:action="@{/prospects}" method="get" class="card card-body border-0 shadow-sm mb-4">
         <div class="row g-3 align-items-end">
 
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="name" class="form-label">Nom de l'organisme</label>
                 <input type="text" id="name" name="name" class="form-control"
                        placeholder="Ex : Secours Catholique"
                        th:value="${name}">
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label for="city" class="form-label">Ville</label>
                 <input type="text" id="city" name="city" class="form-control"
                        placeholder="Ex : Chatou"
                        th:value="${city}">
+            </div>
+
+            <div class="col-md-2">
+                <label for="mode" class="form-label">Usage</label>
+                <select id="mode" name="mode" class="form-select">
+                    <option value="">Tous</option>
+                    <option th:each="m : ${modes}"
+                            th:value="${m}"
+                            th:text="${m.libelle}"
+                            th:selected="${m == mode}"></option>
+                </select>
             </div>
 
             <div class="col-md-3">
@@ -101,6 +113,8 @@
                                class="text-decoration-none"></a>
                             <i th:if="${prospect.analysedAt != null}" class="bi bi-stars text-primary"
                                title="Analysé par l'IA"></i>
+                            <i th:if="${prospect.emploi}" class="bi bi-briefcase text-success"
+                               title="Recherche d'emploi"></i>
                         </td>
 
                         <td th:text="${prospect.city ?: '-'}"></td>
@@ -177,14 +191,14 @@
 
                 <div th:if="${totalPages > 1}" class="btn-group">
                     <a th:href="@{/prospects(page=${currentPage - 1}, size=${pageSize},
-                                 name=${name}, city=${city}, qualification=${qualification})}"
+                                 name=${name}, city=${city}, qualification=${qualification}, mode=${mode})}"
                        th:classappend="${currentPage == 0} ? 'disabled'"
                        th:attr="aria-disabled=${currentPage == 0}"
                        class="btn btn-outline-primary btn-sm">
                         <i class="bi bi-chevron-left"></i> Précédent
                     </a>
                     <a th:href="@{/prospects(page=${currentPage + 1}, size=${pageSize},
-                                 name=${name}, city=${city}, qualification=${qualification})}"
+                                 name=${name}, city=${city}, qualification=${qualification}, mode=${mode})}"
                        th:classappend="${currentPage >= totalPages - 1} ? 'disabled'"
                        th:attr="aria-disabled=${currentPage >= totalPages - 1}"
                        class="btn btn-outline-primary btn-sm">

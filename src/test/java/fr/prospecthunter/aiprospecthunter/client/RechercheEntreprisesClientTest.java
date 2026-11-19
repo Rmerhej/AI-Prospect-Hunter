@@ -78,7 +78,7 @@ class RechercheEntreprisesClientTest {
                 .andRespond(withSuccess(JSON, MediaType.APPLICATION_JSON));
 
         ApiSearchResponse response = client.search(
-                TargetSegment.FORMATION, List.of(Departement.values()), 2);
+                TargetSegment.FORMATION, Departement.ZONE_CLIENT, 2);
 
         server.verify();
         assertEquals(1, response.totalResults());
@@ -99,6 +99,19 @@ class RechercheEntreprisesClientTest {
                 .andRespond(withSuccess(JSON, MediaType.APPLICATION_JSON));
 
         client.search(TargetSegment.RESTAURATION, List.of(Departement.HAUTS_DE_SEINE), 1);
+
+        server.verify();
+    }
+
+    @Test
+    void segmentsEmploiCherchentDe10A499Salaries() {
+        server.expect(requestTo(startsWith(BASE_URL + "/search")))
+                .andExpect(queryContains("activite_principale=85.59A,85.59B"))
+                .andExpect(queryContains("tranche_effectif_salarie=11,12,21,22,31,32"))
+                .andExpect(queryContains("departement=78,75"))
+                .andRespond(withSuccess(JSON, MediaType.APPLICATION_JSON));
+
+        client.search(TargetSegment.EMPLOI_FORMATION_ADULTES, List.of(Departement.YVELINES, Departement.PARIS), 1);
 
         server.verify();
     }

@@ -9,6 +9,7 @@ import fr.prospecthunter.aiprospecthunter.dto.CompanySearchResult;
 import fr.prospecthunter.aiprospecthunter.dto.ImportReport;
 import fr.prospecthunter.aiprospecthunter.entity.Prospect;
 import fr.prospecthunter.aiprospecthunter.enums.Departement;
+import fr.prospecthunter.aiprospecthunter.enums.ProspectMode;
 import fr.prospecthunter.aiprospecthunter.enums.ProspectStatus;
 import fr.prospecthunter.aiprospecthunter.enums.TargetSegment;
 import fr.prospecthunter.aiprospecthunter.enums.TrancheEffectif;
@@ -131,13 +132,15 @@ public class CompanyImportService {
         prospect.setCodeNaf(company.activitePrincipale());
         prospect.setTrancheEffectif(company.trancheEffectif());
         prospect.setStatus(ProspectStatus.A_CONTACTER);
+        prospect.setMode(segment.getMode());
 
-        // Le besoin reste une hypothèse : il va dans la description, pas dans "besoin potentiel".
-        // C'est à vous (ou à l'IA plus tard) de le confirmer.
+        // Le besoin (ou le poste) reste une hypothèse : il va dans la description, pas dans "besoin potentiel".
+        // C'est à vous (ou à l'IA) de le confirmer.
+        String hypothese = segment.getMode() == ProspectMode.EMPLOI ? ". Poste possible : " : ". Besoin probable : ";
         prospect.setDescription(truncate(
                 segment.getLibelle() + " – " + TrancheEffectif.libelle(company.trancheEffectif())
                         + (company.activitePrincipale() == null ? "" : " – NAF " + company.activitePrincipale())
-                        + ". Besoin probable : " + segment.getBesoinProbable()
+                        + hypothese + segment.getBesoinProbable()
                         + ". Importé depuis l'Annuaire des entreprises.",
                 1000));
 

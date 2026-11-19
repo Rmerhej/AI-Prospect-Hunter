@@ -1,6 +1,7 @@
 package fr.prospecthunter.aiprospecthunter.entity;
 
 import fr.prospecthunter.aiprospecthunter.enums.HorizonProjet;
+import fr.prospecthunter.aiprospecthunter.enums.ProspectMode;
 import fr.prospecthunter.aiprospecthunter.enums.ProspectStatus;
 import fr.prospecthunter.aiprospecthunter.enums.StatutFinancement;
 import jakarta.persistence.*;
@@ -84,12 +85,33 @@ public class Prospect {
     @Column(nullable = false, length = 20)
     private HorizonProjet horizonProjet = HorizonProjet.LONG_TERME;
 
+    // Prospection client ou recherche d'emploi ("mode" est un mot-clé SQL : d'où le nom de colonne)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "prospect_mode", nullable = false, length = 20)
+    private ProspectMode mode = ProspectMode.CLIENT;
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
         if (this.status == null) {
             this.status = ProspectStatus.A_CONTACTER;
         }
+        if (this.mode == null) {
+            this.mode = ProspectMode.CLIENT;
+        }
+    }
+
+    public ProspectMode getMode() {
+        return mode;
+    }
+
+    public void setMode(ProspectMode mode) {
+        this.mode = mode;
+    }
+
+    /** Raccourci pour les vues et les services : vrai pour un employeur (recherche d'emploi). */
+    public boolean isEmploi() {
+        return mode == ProspectMode.EMPLOI;
     }
 
     public Long getId() {

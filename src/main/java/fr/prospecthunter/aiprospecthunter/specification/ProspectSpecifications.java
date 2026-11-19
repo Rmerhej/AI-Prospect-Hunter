@@ -1,6 +1,7 @@
 package fr.prospecthunter.aiprospecthunter.specification;
 
 import fr.prospecthunter.aiprospecthunter.entity.Prospect;
+import fr.prospecthunter.aiprospecthunter.enums.ProspectMode;
 import org.springframework.data.jpa.domain.Specification;
 
 public class ProspectSpecifications {
@@ -33,6 +34,13 @@ public class ProspectSpecifications {
                         ? cb.conjunction()
                         : cb.equal(root.get("qualification"), qualification);
     }
+    public static Specification<Prospect> hasMode(ProspectMode mode) {
+        return (root, query, cb) ->
+                mode == null
+                        ? cb.conjunction()
+                        : cb.equal(root.get("mode"), mode);
+    }
+
     private static String escapeLike(String value) {
         return value
                 .replace("\\", "\\\\")

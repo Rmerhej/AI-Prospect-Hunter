@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Profil de recherche d\'emploi')}"></head>
+
+<body class="bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div th:replace="~{fragments/layout :: flash}"></div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <h1 class="h3 mb-1">Profil de recherche d'emploi</h1>
+                    <p class="text-secondary mb-4">
+                        Ce profil sert aux employeurs importés en mode « Recherche d'emploi » :
+                        calcul du score (zone géographique) et analyse IA (adéquation, candidature spontanée).
+                        Il est envoyé à l'IA avec les données publiques de l'entreprise : n'y mettez
+                        ni adresse, ni téléphone, ni autre donnée personnelle sensible.
+                    </p>
+
+                    <form th:action="@{/profil}" th:object="${profil}" method="post" novalidate>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="posteVise">Poste visé *</label>
+                            <input type="text" class="form-control"
+                                   th:field="*{posteVise}" th:errorclass="is-invalid"
+                                   placeholder="Ex : formateur pour adultes, sinon développeur Java">
+                            <div class="invalid-feedback" th:errors="*{posteVise}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="resumeProfil">Résumé du profil *</label>
+                            <textarea class="form-control" rows="7"
+                                      th:field="*{resumeProfil}" th:errorclass="is-invalid"
+                                      placeholder="Diplômes, expériences, compétences, langues..."></textarea>
+                            <div class="form-text">
+                                L'IA n'utilise que ce qui est écrit ici pour vous présenter : soyez précis et factuel.
+                            </div>
+                            <div class="invalid-feedback" th:errors="*{resumeProfil}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <span class="form-label d-block">Départements visés *</span>
+                            <div class="form-check form-check-inline" th:each="d : ${allDepartements}">
+                                <input class="form-check-input" type="checkbox"
+                                       th:field="*{departements}" th:value="${d}">
+                                <label class="form-check-label" th:for="${#ids.prev('departements')}"
+                                       th:text="${d.libelle} + ' (' + ${d.code} + ')'"></label>
+                            </div>
+                            <div class="text-danger small" th:if="${#fields.hasErrors('departements')}"
+                                 th:errors="*{departements}"></div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label" for="titreSignature">Titre de la signature *</label>
+                            <input type="text" class="form-control"
+                                   th:field="*{titreSignature}" th:errorclass="is-invalid">
+                            <div class="form-text">Affiché sous votre nom à la fin de chaque candidature.</div>
+                            <div class="invalid-feedback" th:errors="*{titreSignature}"></div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Enregistrer
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</main>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

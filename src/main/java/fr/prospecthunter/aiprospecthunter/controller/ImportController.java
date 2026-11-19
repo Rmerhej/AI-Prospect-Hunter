@@ -3,8 +3,10 @@ package fr.prospecthunter.aiprospecthunter.controller;
 import fr.prospecthunter.aiprospecthunter.client.ApiUnavailableException;
 import fr.prospecthunter.aiprospecthunter.dto.ImportReport;
 import fr.prospecthunter.aiprospecthunter.enums.Departement;
+import fr.prospecthunter.aiprospecthunter.enums.ProspectMode;
 import fr.prospecthunter.aiprospecthunter.enums.TargetSegment;
 import fr.prospecthunter.aiprospecthunter.service.CompanyImportService;
+import fr.prospecthunter.aiprospecthunter.service.SearchProfileService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +20,21 @@ import java.util.List;
 public class ImportController {
 
     private final CompanyImportService importService;
+    private final SearchProfileService profileService;
 
-    public ImportController(CompanyImportService importService) {
+    public ImportController(CompanyImportService importService, SearchProfileService profileService) {
         this.importService = importService;
+        this.profileService = profileService;
     }
 
-    @ModelAttribute("segments")
-    public TargetSegment[] segments() {
-        return TargetSegment.values();
+    @ModelAttribute("segmentsClient")
+    public List<TargetSegment> segmentsClient() {
+        return TargetSegment.ofMode(ProspectMode.CLIENT);
+    }
+
+    @ModelAttribute("segmentsEmploi")
+    public List<TargetSegment> segmentsEmploi() {
+        return TargetSegment.ofMode(ProspectMode.EMPLOI);
     }
 
     @ModelAttribute("allDepartements")
@@ -40,7 +49,7 @@ public class ImportController {
                              @RequestParam(defaultValue = "1") int page,
                              Model model) {
 
-        List<Departement> selected = orAll(departements);
+        List<Departement> selected = orDefault(departements, segment);
         model.addAttribute("segment", segment);
         model.addAttribute("departements", selected);
 
@@ -62,7 +71,7 @@ public class ImportController {
                                  @RequestParam(required = false) List<String> sirens,
                                  RedirectAttributes redirectAttributes) {
 
-        List<Departement> selected = orAll(departements);
+        List<Departement> selected = orDefault(departements, segment);
 
         try {
             ImportReport report = importService.importCompanies(segment, selected, page, sirens);
@@ -83,9 +92,20 @@ public class ImportController {
         return "redirect:" + url;
     }
 
-    private static List<Departement> orAll(List<Departement> departements) {
-        return departements == null || departements.isEmpty()
-                ? List.of(Departement.values())
-                : departements.stream().distinct().toList();
+    /**
+     * Départements cochés, ou à défaut : la zone client (78, 92) pour la prospection,
+     * la zone du profil de recherche pour l'emploi.
+     */
+    private List<Departement> orDefault(List<Departement> departements, TargetSegment segment) {
+        if (departements != null && !departements.isEmpty()) {
+            return departements.stream().distinct().toList();
+        }
+        if (segment != null && segment.getMode() == ProspectMode.EMPLOI) {
+            List<Departement> zone = profileService.get().getDepartementList();
+            if (!zone.isEmpty()) {
+                return zone;
+            }
+        }
+        return Departement.ZONE_CLIENT;
     }
 }

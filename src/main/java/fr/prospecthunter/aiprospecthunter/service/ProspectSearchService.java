@@ -1,6 +1,7 @@
 package fr.prospecthunter.aiprospecthunter.service;
 
 import fr.prospecthunter.aiprospecthunter.entity.Prospect;
+import fr.prospecthunter.aiprospecthunter.enums.ProspectMode;
 import fr.prospecthunter.aiprospecthunter.repository.ProspectRepository;
 import fr.prospecthunter.aiprospecthunter.specification.ProspectSpecifications;
 import org.springframework.data.domain.Page;
@@ -21,12 +22,20 @@ public class ProspectSearchService {
         this.prospectRepository = prospectRepository;
     }
 
+    /** Recherche sans filtre de mode (prospects client et employeurs). */
     public Page<Prospect> search(String name, String city, String qualification, int page, int size) {
+        return search(name, city, qualification, null, page, size);
+    }
+
+    /** @param mode null = tous les modes */
+    public Page<Prospect> search(String name, String city, String qualification, ProspectMode mode,
+                                 int page, int size) {
 
         Specification<Prospect> specification =
                 Specification.where(ProspectSpecifications.nameContains(name))
                         .and(ProspectSpecifications.cityContains(city))
-                        .and(ProspectSpecifications.hasQualification(qualification));
+                        .and(ProspectSpecifications.hasQualification(qualification))
+                        .and(ProspectSpecifications.hasMode(mode));
 
         // Les paramètres viennent de l'URL : on les borne.
         // Sans ça, ?page=-1 provoque une erreur 500 et ?size=1000000 charge toute la table.

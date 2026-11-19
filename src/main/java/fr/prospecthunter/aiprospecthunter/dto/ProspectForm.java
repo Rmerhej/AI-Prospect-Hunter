@@ -2,6 +2,7 @@ package fr.prospecthunter.aiprospecthunter.dto;
 
 import fr.prospecthunter.aiprospecthunter.entity.Prospect;
 import fr.prospecthunter.aiprospecthunter.enums.HorizonProjet;
+import fr.prospecthunter.aiprospecthunter.enums.ProspectMode;
 import fr.prospecthunter.aiprospecthunter.enums.ProspectStatus;
 import fr.prospecthunter.aiprospecthunter.enums.StatutFinancement;
 import jakarta.validation.constraints.NotBlank;
@@ -42,6 +43,9 @@ public class ProspectForm {
     @Size(max = 1000, message = "1000 caractères maximum")
     private String potentialNeed;
 
+    @NotNull(message = "Choisissez un usage")
+    private ProspectMode mode = ProspectMode.CLIENT;
+
     @NotNull(message = "Choisissez un statut")
     private ProspectStatus status = ProspectStatus.A_CONTACTER;
 
@@ -62,6 +66,9 @@ public class ProspectForm {
         form.sector = prospect.getSector();
         form.description = prospect.getDescription();
         form.potentialNeed = prospect.getPotentialNeed();
+        if (prospect.getMode() != null) {
+            form.mode = prospect.getMode();
+        }
         if (prospect.getStatus() != null) {
             form.status = prospect.getStatus();
         }
@@ -83,6 +90,7 @@ public class ProspectForm {
         prospect.setSector(trim(sector));
         prospect.setDescription(trim(description));
         prospect.setPotentialNeed(trim(potentialNeed));
+        prospect.setMode(mode);
         prospect.setStatus(status);
         prospect.setStatutFinancement(statutFinancement);
         prospect.setHorizonProjet(horizonProjet);
@@ -154,6 +162,14 @@ public class ProspectForm {
 
     public void setPotentialNeed(String potentialNeed) {
         this.potentialNeed = potentialNeed;
+    }
+
+    public ProspectMode getMode() {
+        return mode;
+    }
+
+    public void setMode(ProspectMode mode) {
+        this.mode = mode;
     }
 
     public ProspectStatus getStatus() {

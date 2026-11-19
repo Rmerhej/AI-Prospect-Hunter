@@ -3,7 +3,6 @@ package fr.prospecthunter.aiprospecthunter.client;
 import fr.prospecthunter.aiprospecthunter.client.dto.ApiSearchResponse;
 import fr.prospecthunter.aiprospecthunter.enums.Departement;
 import fr.prospecthunter.aiprospecthunter.enums.TargetSegment;
-import fr.prospecthunter.aiprospecthunter.enums.TrancheEffectif;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -56,7 +55,7 @@ public class RechercheEntreprisesClient {
     }
 
     /**
-     * Recherche les entreprises actives de 10 à 49 salariés d'un segment, dans les départements choisis.
+     * Recherche les entreprises actives d'un segment (dans ses tranches d'effectif), dans les départements choisis.
      *
      * @param page numéro de page, à partir de 1 (convention de l'API)
      */
@@ -71,7 +70,7 @@ public class RechercheEntreprisesClient {
                     .uri(uriBuilder -> {
                         uriBuilder.path("/search")
                                 .queryParam("departement", codesDepartements)
-                                .queryParam("tranche_effectif_salarie", TrancheEffectif.CIBLES)
+                                .queryParam("tranche_effectif_salarie", segment.getTranches())
                                 .queryParam("etat_administratif", "A")
                                 // Réponse allégée + adresse du siège (sans les dirigeants)
                                 .queryParam("minimal", "true")
