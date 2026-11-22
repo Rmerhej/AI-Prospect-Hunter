@@ -47,6 +47,28 @@
                 <div class="card-body">
                     <h2 class="h5 mb-3">Informations</h2>
                     <dl class="mb-0 small">
+                        <dt>Site web</dt>
+                        <dd>
+                            <a th:if="${prospect.website != null and #strings.startsWith(prospect.website, 'http')}"
+                               th:href="${prospect.website}" th:text="${prospect.website}"
+                               target="_blank" rel="noopener noreferrer"></a>
+                            <span th:unless="${prospect.website != null and #strings.startsWith(prospect.website, 'http')}"
+                                  class="text-secondary">Non renseigné</span>
+                        </dd>
+
+                        <dt>E-mail</dt>
+                        <dd>
+                            <th:block th:if="${prospect.email != null}">
+                                <a th:href="'mailto:' + ${prospect.email}" th:text="${prospect.email}"></a>
+                                <div th:if="${prospect.emailSource != null}" class="text-secondary">
+                                    trouvé sur
+                                    <a th:href="${prospect.emailSource}" target="_blank" rel="noopener noreferrer">cette page</a>
+                                    : vérifiez-le avant d'écrire
+                                </div>
+                            </th:block>
+                            <span th:if="${prospect.email == null}" class="text-secondary">Non trouvé</span>
+                        </dd>
+
                         <dt>Ville</dt>
                         <dd th:text="${prospect.city != null} ? ${prospect.city + ' (' + (prospect.postalCode ?: '-') + ')'} : '-'"></dd>
 
@@ -74,6 +96,23 @@
                             </dd>
                         </th:block>
                     </dl>
+
+                    <!-- Recherche automatique : site officiel (si absent) puis e-mail publié sur ce site -->
+                    <form th:action="@{/prospects/{id}/enrichir(id=${prospect.id})}" method="post"
+                          class="ai-form mt-3">
+                        <button type="submit" class="btn btn-sm btn-outline-primary w-100">
+                            <span class="label-idle">
+                                <i class="bi bi-search"></i>
+                                <span th:if="${#strings.isEmpty(prospect.website)}">Trouver le site et l'e-mail</span>
+                                <span th:unless="${#strings.isEmpty(prospect.website)}">Chercher l'e-mail sur le site</span>
+                            </span>
+                            <span class="label-busy d-none">
+                                <span class="spinner-border spinner-border-sm"></span> Recherche en cours…
+                            </span>
+                        </button>
+                        <div th:if="${prospect.enrichedAt != null}" class="text-secondary small mt-1"
+                             th:text="'Dernière recherche le ' + ${#temporals.format(prospect.enrichedAt, 'dd/MM/yyyy à HH:mm')}"></div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -175,6 +214,11 @@
                             </button>
                             <button type="button" class="btn btn-outline-secondary" id="copy-email">
                                 <i class="bi bi-clipboard"></i> <span>Copier l'e-mail</span>
+                            </button>
+                            <!-- Ouvre la messagerie avec destinataire, objet et message déjà remplis -->
+                            <button type="button" class="btn btn-outline-success" id="open-mail"
+                                    th:if="${prospect.email != null}" th:attr="data-email=${prospect.email}">
+                                <i class="bi bi-send"></i> Ouvrir dans ma messagerie
                             </button>
                         </div>
                     </form>
