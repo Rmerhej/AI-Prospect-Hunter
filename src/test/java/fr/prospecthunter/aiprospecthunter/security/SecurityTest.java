@@ -42,6 +42,17 @@ class SecurityTest {
     }
 
     @Test
+    void iconesLogoEtFichiersDeLApplicationInstallableSontPublics() throws Exception {
+        mockMvc.perform(get("/favicon.ico")).andExpect(status().isOk());
+        mockMvc.perform(get("/icons/icon-192.png")).andExpect(status().isOk());
+        mockMvc.perform(get("/images/logo.png")).andExpect(status().isOk());
+        mockMvc.perform(get("/manifest.json")).andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Prospect Hunter IA")));
+        mockMvc.perform(get("/sw.js")).andExpect(status().isOk());
+        mockMvc.perform(get("/offline.html")).andExpect(status().isOk());
+    }
+
+    @Test
     void connexionAvecLeBonMotDePasse() throws Exception {
         mockMvc.perform(formLogin().user("roland").password("motdepasse-test"))
                 .andExpect(authenticated().withUsername("roland"))

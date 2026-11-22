@@ -10,6 +10,15 @@
           rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
           rel="stylesheet">
+    <!-- Icônes et application installable (PWA) -->
+    <link rel="icon" th:href="@{/favicon.ico}" sizes="any">
+    <link rel="apple-touch-icon" th:href="@{/icons/apple-touch-icon.png}">
+    <link rel="manifest" th:href="@{/manifest.json}">
+    <meta name="theme-color" content="#1F5FA8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Prospect Hunter">
+    <script th:src="@{/js/pwa.js}" defer></script>
 </head>
 
 <body>
@@ -17,8 +26,10 @@
 <!-- Barre de navigation commune : th:replace="~{fragments/layout :: navbar}" -->
 <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/}">
-            <i class="bi bi-crosshair"></i> AI Prospect Hunter
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" th:href="@{/}">
+            <!-- Emblème sur pastille blanche : lisible sur la barre bleue -->
+            <img th:src="@{/icons/icon-192.png}" alt="" width="32" height="32" class="rounded-circle bg-white p-1">
+            Prospect Hunter IA
         </a>
         <div class="d-flex gap-3">
             <a class="nav-link text-white" th:href="@{/prospects}">Mes prospects</a>
