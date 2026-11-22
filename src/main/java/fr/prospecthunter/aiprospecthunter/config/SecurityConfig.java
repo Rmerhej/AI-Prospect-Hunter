@@ -29,7 +29,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         // Pages accessibles sans être connecté
-                        .requestMatchers("/login", "/js/**", "/favicon.ico", "/error").permitAll()
+                        .requestMatchers("/login", "/js/**", "/icons/**", "/images/**", "/favicon.ico", "/error",
+                                "/manifest.json", "/sw.js", "/offline.html").permitAll()
                         // Tout le reste exige une connexion
                         .anyRequest().authenticated())
                 .formLogin(form -> form

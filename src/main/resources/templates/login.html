@@ -9,8 +9,10 @@
         <div class="col-md-6 col-lg-4">
 
             <div class="text-center mb-4">
-                <i class="bi bi-crosshair display-5 text-primary"></i>
-                <h1 class="h4 mt-2">AI Prospect Hunter</h1>
+                <h1 class="m-0">
+                    <img th:src="@{/images/logo.png}" alt="Prospect Hunter IA - Recherche d'emploi assistée par IA"
+                         class="img-fluid" width="320" height="184">
+                </h1>
             </div>
 
             <div class="card border-0 shadow-sm">
@@ -32,8 +34,14 @@
                         </div>
                         <div class="mb-4">
                             <label for="password" class="form-label">Mot de passe</label>
-                            <input type="password" id="password" name="password" class="form-control"
-                                   autocomplete="current-password" required>
+                            <div class="input-group">
+                                <input type="password" id="password" name="password" class="form-control"
+                                       autocomplete="current-password" required>
+                                <button type="button" class="btn btn-outline-secondary js-toggle-password"
+                                        data-target="password" aria-label="Afficher le mot de passe" aria-pressed="false">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary w-100">
                             <i class="bi bi-box-arrow-in-right"></i> Se connecter
@@ -46,6 +54,6 @@
         </div>
     </div>
 </main>
-
+<script th:src="@{/js/password-toggle.js}" defer></script>
 </body>
 </html>
