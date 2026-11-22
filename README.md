@@ -1,5 +1,7 @@
 # AI Prospect Hunter
 
+![icon-192.png](src/main/resources/static/icons/icon-192.png)
+
 [![CI](https://github.com/Rmerhej/AI-Prospect-Hunter/actions/workflows/ci.yml/badge.svg)](https://github.com/Rmerhej/AI-Prospect-Hunter/actions/workflows/ci.yml)
 
 Application web de prospection : identifier, qualifier et suivre des organismes susceptibles d'avoir besoin d'une application sur mesure (planning, présences, émargement…).
