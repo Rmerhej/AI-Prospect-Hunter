@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('Profil de recherche d\'emploi')}"></head>
+<head th:replace="~{fragments/layout :: head('Profil emploi')}"></head>
 
 <body class="bg-light">
 
@@ -29,7 +29,7 @@
                         <div class="mb-3">
                             <label class="form-label" for="posteVise">Poste visé *</label>
                             <input type="text" class="form-control"
-                                   th:field="*{posteVise}" th:errorclass="is-invalid"
+                                   th:field="*{posteVise}"  id="posteVise" th:errorclass="is-invalid"
                                    placeholder="Ex : formateur pour adultes, sinon développeur Java">
                             <div class="invalid-feedback" th:errors="*{posteVise}"></div>
                         </div>
@@ -37,7 +37,7 @@
                         <div class="mb-3">
                             <label class="form-label" for="resumeProfil">Résumé du profil *</label>
                             <textarea class="form-control" rows="7"
-                                      th:field="*{resumeProfil}" th:errorclass="is-invalid"
+                                      th:field="*{resumeProfil}" id="resumeProfil" th:errorclass="is-invalid"
                                       placeholder="Diplômes, expériences, compétences, langues..."></textarea>
                             <div class="form-text">
                                 L'IA n'utilise que ce qui est écrit ici pour vous présenter : soyez précis et factuel.
@@ -60,7 +60,7 @@
                         <div class="mb-4">
                             <label class="form-label" for="titreSignature">Titre de la signature *</label>
                             <input type="text" class="form-control"
-                                   th:field="*{titreSignature}" th:errorclass="is-invalid">
+                                   th:field="*{titreSignature}" id="titreSignature"  th:errorclass="is-invalid">
                             <div class="form-text">Affiché sous votre nom à la fin de chaque candidature.</div>
                             <div class="invalid-feedback" th:errors="*{titreSignature}"></div>
                         </div>
