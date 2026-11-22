@@ -22,11 +22,15 @@ public class DashboardService {
 
     /** Prospects à qui on a écrit (quelle que soit la suite). */
     static final Set<ProspectStatus> CONTACTES = EnumSet.of(
-            ProspectStatus.CONTACTE, ProspectStatus.RELANCE, ProspectStatus.REPONDU,
-            ProspectStatus.CLIENT, ProspectStatus.PERDU);
+            ProspectStatus.CONTACTE, ProspectStatus.RELANCE, ProspectStatus.REPONDU, ProspectStatus.ENTRETIEN,
+            ProspectStatus.CLIENT, ProspectStatus.EMBAUCHE, ProspectStatus.PERDU);
 
     /** Prospects qui ont répondu. */
-    static final Set<ProspectStatus> REPONSES = EnumSet.of(ProspectStatus.REPONDU, ProspectStatus.CLIENT);
+    static final Set<ProspectStatus> REPONSES = EnumSet.of(
+            ProspectStatus.REPONDU, ProspectStatus.ENTRETIEN, ProspectStatus.CLIENT, ProspectStatus.EMBAUCHE);
+
+    /** Réussites : un client signé (prospection) ou une embauche (recherche d'emploi). */
+    static final Set<ProspectStatus> REUSSITES = EnumSet.of(ProspectStatus.CLIENT, ProspectStatus.EMBAUCHE);
 
     private static final String NON_DEFINI = "Non défini";
 
@@ -51,7 +55,7 @@ public class DashboardService {
         long total = statusCounts.values().stream().mapToLong(Long::longValue).sum() + sansStatut;
         long contactes = sum(statusCounts, CONTACTES);
         long reponses = sum(statusCounts, REPONSES);
-        long clients = statusCounts.getOrDefault(ProspectStatus.CLIENT, 0L);
+        long clients = sum(statusCounts, REUSSITES);
 
         // Tous les statuts, dans l'ordre du suivi commercial, même ceux à 0
         List<CountItem> parStatut = new ArrayList<>();

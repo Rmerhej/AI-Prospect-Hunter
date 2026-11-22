@@ -63,7 +63,7 @@
         <div class="col-6 col-lg-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-secondary small"><i class="bi bi-trophy"></i> Clients</div>
+                    <div class="text-secondary small"><i class="bi bi-trophy"></i> Clients / embauches</div>
                     <div class="display-6 fw-bold text-success" th:text="${s.clients()}">0</div>
                     <div class="small text-secondary"
                          th:text="${s.tauxConversion() != null} ? ${'Conversion : ' + s.tauxConversion() + ' %'} : '—'"></div>
@@ -88,7 +88,7 @@
                              th:attr="aria-label=${item.libelle()},aria-valuenow=${item.pourcentage()}"
                              aria-valuemin="0" aria-valuemax="100">
                             <div class="progress-bar"
-                                 th:classappend="${item.libelle() == 'Client'} ? 'bg-success'
+                                 th:classappend="${item.libelle() == 'Client' or item.libelle() == 'Embauché'} ? 'bg-success'
                                                 : (${item.libelle() == 'Perdu'} ? 'bg-secondary' : '')"
                                  th:style="'width: ' + ${item.pourcentage()} + '%'"></div>
                         </div>
@@ -144,8 +144,8 @@
     </div>
 
     <p class="text-secondary small mt-4 mb-0">
-        Taux de réponse = prospects « A répondu » ou « Client » ÷ prospects contactés
-        (Contacté, Relancé, A répondu, Client, Perdu). Pensez à mettre à jour les statuts après chaque échange.
+        Taux de réponse = prospects « A répondu », « Entretien », « Client » ou « Embauché » ÷ prospects contactés
+        (tous les statuts sauf « À contacter »). Pensez à mettre à jour les statuts après chaque échange.
     </p>
 
 </main>

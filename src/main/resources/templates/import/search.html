@@ -18,7 +18,12 @@
     <div class="mb-4">
         <h1 class="h3 mb-1">Importer des entreprises</h1>
         <p class="text-secondary mb-0">
-            Entreprises actives de 10 à 49 salariés, issues de l'Annuaire des entreprises (données publiques).
+            Entreprises actives issues de l'Annuaire des entreprises (données publiques) :
+            10 à 49 salariés pour la prospection, 10 à 499 salariés pour la recherche d'emploi.
+            <span th:if="${segment != null}" class="d-block">
+                Cible choisie : <strong th:text="${segment.libelle}"></strong>
+                (<span th:text="${segment.effectifLibelle}"></span>).
+            </span>
         </p>
     </div>
 
@@ -30,11 +35,20 @@
                 <label for="segment" class="form-label">Cible</label>
                 <select id="segment" name="segment" class="form-select" required>
                     <option value="">Choisir une cible</option>
-                    <option th:each="s : ${segments}"
-                            th:value="${s}"
-                            th:text="${s.libelle}"
-                            th:selected="${s == segment}">
-                    </option>
+                    <optgroup label="Prospection client">
+                        <option th:each="s : ${segmentsClient}"
+                                th:value="${s}"
+                                th:text="${s.libelle}"
+                                th:selected="${s == segment}">
+                        </option>
+                    </optgroup>
+                    <optgroup label="Recherche d'emploi">
+                        <option th:each="s : ${segmentsEmploi}"
+                                th:value="${s}"
+                                th:text="${s.libelle}"
+                                th:selected="${s == segment}">
+                        </option>
+                    </optgroup>
                 </select>
             </div>
 

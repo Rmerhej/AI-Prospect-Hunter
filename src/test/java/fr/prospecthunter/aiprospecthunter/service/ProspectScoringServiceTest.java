@@ -1,6 +1,7 @@
 package fr.prospecthunter.aiprospecthunter.service;
 
 import fr.prospecthunter.aiprospecthunter.entity.Prospect;
+import fr.prospecthunter.aiprospecthunter.enums.ProspectMode;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -74,12 +75,63 @@ class ProspectScoringServiceTest {
         assertEquals(0, service.calculateScore(prospect));
     }
 
+    // ----- Mode recherche d'emploi -----
+
+    @Test
+    void employeurCompletEtCibleObtient100() {
+        Prospect prospect = employeur();
+        prospect.setSector("Formation d'adultes");
+        prospect.setTrancheEffectif("22");                 // 100-199 salariés : dans la cible emploi
+        prospect.setPotentialNeed("Formateur FLE");
+        prospect.setPostalCode("75011");                   // Paris : dans la zone du profil par défaut
+        prospect.setWebsite("https://www.exemple.fr");
+        prospect.setDescription("Centre de formation pour adultes, ateliers de français et de numérique.");
+
+        assertEquals(100, service.calculateScore(prospect));
+    }
+
+    @Test
+    void unSecteurClientNeRapportePasDePointsAUnEmployeur() {
+        Prospect prospect = employeur();
+        prospect.setSector("Restauration");
+
+        assertEquals(0, service.calculateScore(prospect));
+    }
+
+    @Test
+    void tailleDUnEmployeur() {
+        Prospect petit = employeur();
+        petit.setTrancheEffectif("03");                     // 6-9 salariés
+        Prospect grand = employeur();
+        grand.setTrancheEffectif("32");                     // 250-499 salariés
+
+        assertEquals(0, service.calculateScore(petit));
+        assertEquals(15, service.calculateScore(grand));
+    }
+
+    @Test
+    void zoneDUnEmployeurSelonLeProfil() {
+        Prospect paris = employeur();
+        paris.setPostalCode("75001");
+        Prospect lyon = employeur();
+        lyon.setPostalCode("69001");
+
+        assertEquals(20, service.calculateScore(paris));
+        assertEquals(0, service.calculateScore(lyon));
+    }
+
     @Test
     void qualificationSelonLesSeuils() {
         assertEquals("Prioritaire", service.determineQualification(80));
         assertEquals("À étudier", service.determineQualification(79));
         assertEquals("À étudier", service.determineQualification(50));
         assertEquals("Faible potentiel", service.determineQualification(49));
+    }
+
+    private static Prospect employeur() {
+        Prospect prospect = new Prospect();
+        prospect.setMode(ProspectMode.EMPLOI);
+        return prospect;
     }
 
     private int scoreAvecTranche(String tranche) {

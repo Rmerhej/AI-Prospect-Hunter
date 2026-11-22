@@ -26,6 +26,19 @@
 
                         <input type="hidden" th:field="*{id}">
 
+                        <!-- Usage : il décide du calcul du score et du texte envoyé à l'IA -->
+                        <div class="mb-3">
+                            <span class="form-label d-block">Usage</span>
+                            <div class="form-check form-check-inline" th:each="m : ${modes}">
+                                <input class="form-check-input" type="radio"
+                                       th:field="*{mode}" th:value="${m}">
+                                <label class="form-check-label" th:for="${#ids.prev('mode')}"
+                                       th:text="${m.libelle}"></label>
+                            </div>
+                            <div class="text-danger small" th:if="${#fields.hasErrors('mode')}"
+                                 th:errors="*{mode}"></div>
+                        </div>
+
                         <!-- Identité -->
                         <div class="mb-3">
                             <label class="form-label" for="name">Nom de l'organisme *</label>
@@ -73,10 +86,13 @@
                             <label class="form-label" for="sector">Secteur d'activité</label>
                             <select class="form-select" th:field="*{sector}">
                                 <option value="">Choisir un secteur</option>
-                                <option th:each="seg : ${segments}"
-                                        th:value="${seg.sector}"
-                                        th:text="${seg.libelle}">
-                                </option>
+                                <optgroup th:each="m : ${modes}" th:label="${m.libelle}">
+                                    <option th:each="seg : ${segments}"
+                                            th:if="${seg.mode == m}"
+                                            th:value="${seg.sector}"
+                                            th:text="${seg.libelle}">
+                                    </option>
+                                </optgroup>
                                 <option value="Association">Association</option>
                                 <option value="Autre">Autre</option>
                             </select>
@@ -135,12 +151,14 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label" for="potentialNeed">Besoin numérique potentiel</label>
+                            <label class="form-label" for="potentialNeed">
+                                Besoin numérique potentiel <span class="text-secondary">(ou poste possible, pour un employeur)</span>
+                            </label>
                             <textarea class="form-control"
                                       th:field="*{potentialNeed}"
                                       th:errorclass="is-invalid"
                                       rows="3"
-                                      placeholder="Ex : planning des formateurs, émargement numérique..."></textarea>
+                                      placeholder="Ex : planning des formateurs, émargement numérique... ou : formateur FLE"></textarea>
                             <div class="invalid-feedback" th:errors="*{potentialNeed}"></div>
                         </div>
 

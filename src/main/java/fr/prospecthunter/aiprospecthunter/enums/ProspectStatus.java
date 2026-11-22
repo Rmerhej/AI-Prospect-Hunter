@@ -1,7 +1,7 @@
 package fr.prospecthunter.aiprospecthunter.enums;
 
 /**
- * Étapes du suivi commercial d'un prospect.
+ * Étapes du suivi d'un prospect (prospection client ou candidature).
  */
 public enum ProspectStatus {
 
@@ -9,7 +9,9 @@ public enum ProspectStatus {
     CONTACTE("Contacté"),
     RELANCE("Relancé"),
     REPONDU("A répondu"),
+    ENTRETIEN("Entretien"),
     CLIENT("Client"),
+    EMBAUCHE("Embauché"),
     PERDU("Perdu");
 
     private final String libelle;

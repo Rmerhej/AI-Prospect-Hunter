@@ -3,6 +3,7 @@ package fr.prospecthunter.aiprospecthunter.service;
 import fr.prospecthunter.aiprospecthunter.ai.AiAnalysis;
 import fr.prospecthunter.aiprospecthunter.ai.ProspectAnalyzer;
 import fr.prospecthunter.aiprospecthunter.entity.Prospect;
+import fr.prospecthunter.aiprospecthunter.entity.SearchProfile;
 import fr.prospecthunter.aiprospecthunter.exception.ProspectNotFoundException;
 import fr.prospecthunter.aiprospecthunter.repository.ProspectRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,23 +14,32 @@ import java.time.LocalDateTime;
 /**
  * Lance l'analyse IA d'un prospect, enregistre le résultat et gère le brouillon d'e-mail.
  * L'e-mail n'est JAMAIS envoyé automatiquement : c'est vous qui le relisez et l'envoyez.
+ * <ul>
+ *     <li>Prospection client : signature "développeur" + mention d'opposition (démarchage commercial).</li>
+ *     <li>Recherche d'emploi : signature avec le titre du profil, sans mention d'opposition (candidature).</li>
+ * </ul>
  */
 @Service
 public class ProspectAnalysisService {
 
-    /** Mention d'opposition ajoutée par le code (et non par l'IA) : elle est donc toujours présente. */
+    /** Mention d'opposition ajoutée par le code (et non par l'IA) : toujours présente en prospection client. */
     static final String OPT_OUT =
             "Si vous ne souhaitez plus recevoir de message de ma part, il vous suffit de répondre « STOP ».";
 
     private final ProspectAnalyzer analyzer;
     private final ProspectRepository prospectRepository;
     private final ProspectScoringService scoringService;
+    private final SearchProfileService profileService;
+    private final String nom;
+    private final String ville;
+    private final String lien;
     private final String signature;
 
     public ProspectAnalysisService(
             ProspectAnalyzer analyzer,
             ProspectRepository prospectRepository,
             ProspectScoringService scoringService,
+            SearchProfileService profileService,
             @Value("${prospect-hunter.signature.nom}") String nom,
             @Value("${prospect-hunter.signature.titre}") String titre,
             @Value("${prospect-hunter.signature.ville}") String ville,
@@ -37,6 +47,10 @@ public class ProspectAnalysisService {
         this.analyzer = analyzer;
         this.prospectRepository = prospectRepository;
         this.scoringService = scoringService;
+        this.profileService = profileService;
+        this.nom = nom;
+        this.ville = ville;
+        this.lien = lien;
         this.signature = buildSignature(nom, titre, ville, lien);
     }
 
@@ -47,13 +61,18 @@ public class ProspectAnalysisService {
      */
     public Prospect analyze(Long id) {
         Prospect prospect = find(id);
-        AiAnalysis analysis = analyzer.analyze(prospect);
+        SearchProfile profile = profileService.get();
+        AiAnalysis analysis = analyzer.analyze(prospect, profile);
 
         prospect.setAiPertinence(Math.clamp(analysis.pertinence(), 0, 100));
         prospect.setAiAnalysis(truncate(analysis.analyse(), 2000));
         prospect.setAiProposedNeed(truncate(analysis.besoinPotentiel(), 1000));
         prospect.setEmailSubject(truncate(analysis.objetEmail(), 200));
-        prospect.setEmailDraft(truncate(composeEmail(analysis.corpsEmail()), 4000));
+        String corps = analysis.corpsEmail();
+        String email = prospect.isEmploi()
+                ? composeCandidature(corps, profile.getTitreSignature())
+                : composeEmail(corps);
+        prospect.setEmailDraft(truncate(email, 4000));
         prospect.setAnalysedAt(LocalDateTime.now());
 
         return prospectRepository.save(prospect);
@@ -77,7 +96,8 @@ public class ProspectAnalysisService {
     public void saveDraft(Long id, String subject, String body) {
         Prospect prospect = find(id);
         prospect.setEmailSubject(subject.strip());
-        prospect.setEmailDraft(ensureOptOut(body.strip()));
+        // La mention d'opposition ne concerne que le démarchage commercial
+        prospect.setEmailDraft(prospect.isEmploi() ? body.strip() : ensureOptOut(body.strip()));
         prospectRepository.save(prospect);
     }
 
@@ -89,6 +109,14 @@ public class ProspectAnalysisService {
 
     String composeEmail(String corps) {
         return corps.strip() + "\n\n" + signature + "\n\n" + OPT_OUT;
+    }
+
+    /** Candidature : signature avec le titre du profil de recherche, sans mention d'opposition. */
+    String composeCandidature(String corps, String titreSignature) {
+        String titre = titreSignature == null || titreSignature.isBlank()
+                ? new SearchProfile().getTitreSignature()
+                : titreSignature.strip();
+        return corps.strip() + "\n\n" + buildSignature(nom, titre, ville, lien);
     }
 
     /** Si la mention de désinscription a été effacée pendant la relecture, on la remet. */

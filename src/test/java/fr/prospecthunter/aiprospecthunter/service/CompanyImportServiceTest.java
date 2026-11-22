@@ -8,6 +8,7 @@ import fr.prospecthunter.aiprospecthunter.dto.CompanySearchResult;
 import fr.prospecthunter.aiprospecthunter.dto.ImportReport;
 import fr.prospecthunter.aiprospecthunter.entity.Prospect;
 import fr.prospecthunter.aiprospecthunter.enums.Departement;
+import fr.prospecthunter.aiprospecthunter.enums.ProspectMode;
 import fr.prospecthunter.aiprospecthunter.enums.ProspectStatus;
 import fr.prospecthunter.aiprospecthunter.enums.TargetSegment;
 import fr.prospecthunter.aiprospecthunter.repository.ProspectRepository;
@@ -100,6 +101,27 @@ class CompanyImportServiceTest {
         // Secteur 25 + taille 20 + zone 15 + description 10
         assertEquals(70, saved.getScore());
         assertEquals("À étudier", saved.getQualification());
+        assertEquals(ProspectMode.CLIENT, saved.getMode());
+    }
+
+    @Test
+    void importEmploiCreeUnEmployeur() {
+        when(client.search(TargetSegment.EMPLOI_FORMATION_ADULTES, DEPARTEMENTS, 1))
+                .thenReturn(response(company("111111111", "FORMA ADULTES")));
+        when(prospectRepository.findExistingSirens(anyCollection())).thenReturn(Set.of());
+
+        service.importCompanies(TargetSegment.EMPLOI_FORMATION_ADULTES, DEPARTEMENTS, 1, List.of("111111111"));
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<Prospect>> captor = ArgumentCaptor.forClass(List.class);
+        verify(prospectRepository).saveAll(captor.capture());
+        Prospect saved = captor.getValue().getFirst();
+
+        assertEquals(ProspectMode.EMPLOI, saved.getMode());
+        assertEquals("Formation d'adultes", saved.getSector());
+        assertTrue(saved.getDescription().contains("Poste possible"));
+        // Secteur 25 + taille 15 + zone du profil par défaut (78) 20 + description 10
+        assertEquals(70, saved.getScore());
     }
 
     @Test

@@ -19,6 +19,9 @@
     <div class="d-flex justify-content-between align-items-start mb-4">
         <div>
             <h1 class="h3 mb-1" th:text="${prospect.name}">Nom</h1>
+            <span class="badge bg-success" th:if="${prospect.emploi}">
+                <i class="bi bi-briefcase"></i> Recherche d'emploi
+            </span>
             <span class="badge bg-secondary" th:text="${prospect.sector ?: 'Secteur non défini'}"></span>
             <span class="badge"
                   th:classappend="${prospect.qualification == 'Prioritaire'} ? 'bg-success'
@@ -56,7 +59,7 @@
                         <dt>Statut</dt>
                         <dd th:text="${prospect.status != null} ? ${prospect.status.libelle} : '-'"></dd>
 
-                        <dt>Besoin potentiel</dt>
+                        <dt th:text="${prospect.emploi} ? 'Poste possible' : 'Besoin potentiel'">Besoin potentiel</dt>
                         <dd th:text="${prospect.potentialNeed ?: 'Non identifié'}"></dd>
 
                         <dt>Description</dt>
@@ -98,9 +101,14 @@
                         </form>
                     </div>
 
-                    <p th:if="${prospect.analysedAt == null}" class="text-secondary mb-0">
+                    <p th:if="${prospect.analysedAt == null and !prospect.emploi}" class="text-secondary mb-0">
                         Pas encore analysé. L'IA évalue l'intérêt de l'entreprise pour une application de planning
                         et de présences, puis prépare un brouillon d'e-mail. Seules des données publiques sont envoyées.
+                    </p>
+                    <p th:if="${prospect.analysedAt == null and prospect.emploi}" class="text-secondary mb-0">
+                        Pas encore analysé. L'IA compare l'entreprise à votre
+                        <a th:href="@{/profil}">profil de recherche</a>, propose un poste possible et prépare une
+                        candidature spontanée. Sont envoyés : les données publiques de l'entreprise et votre profil.
                     </p>
 
                     <th:block th:if="${prospect.analysedAt != null}">
@@ -119,13 +127,14 @@
                         <div class="alert alert-light border d-flex justify-content-between align-items-center mb-0"
                              th:if="${prospect.aiProposedNeed != null}">
                             <div>
-                                <strong>Besoin proposé :</strong>
+                                <strong th:text="${prospect.emploi} ? 'Poste proposé :' : 'Besoin proposé :'">Besoin proposé :</strong>
                                 <span th:text="${prospect.aiProposedNeed}"></span>
                             </div>
                             <form th:if="${prospect.aiProposedNeed != prospect.potentialNeed}"
                                   th:action="@{/prospects/{id}/appliquer-besoin(id=${prospect.id})}" method="post">
                                 <button type="submit" class="btn btn-sm btn-outline-success text-nowrap ms-2">
-                                    <i class="bi bi-check2"></i> Utiliser ce besoin
+                                    <i class="bi bi-check2"></i>
+                                    <span th:text="${prospect.emploi} ? 'Retenir ce poste' : 'Utiliser ce besoin'">Utiliser ce besoin</span>
                                 </button>
                             </form>
                             <span th:unless="${prospect.aiProposedNeed != prospect.potentialNeed}"

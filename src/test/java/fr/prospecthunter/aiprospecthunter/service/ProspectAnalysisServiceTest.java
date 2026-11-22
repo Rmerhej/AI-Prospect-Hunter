@@ -4,6 +4,8 @@ import fr.prospecthunter.aiprospecthunter.ai.AiAnalysis;
 import fr.prospecthunter.aiprospecthunter.ai.AiUnavailableException;
 import fr.prospecthunter.aiprospecthunter.ai.ProspectAnalyzer;
 import fr.prospecthunter.aiprospecthunter.entity.Prospect;
+import fr.prospecthunter.aiprospecthunter.entity.SearchProfile;
+import fr.prospecthunter.aiprospecthunter.enums.ProspectMode;
 import fr.prospecthunter.aiprospecthunter.exception.ProspectNotFoundException;
 import fr.prospecthunter.aiprospecthunter.repository.ProspectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,13 +29,19 @@ class ProspectAnalysisServiceTest {
     @Mock
     private ProspectRepository prospectRepository;
 
+    @Mock
+    private SearchProfileService profileService;
+
     private ProspectAnalysisService service;
     private Prospect prospect;
+    private final SearchProfile profile = new SearchProfile();
 
     @BeforeEach
     void setUp() {
         service = new ProspectAnalysisService(analyzer, prospectRepository, new ProspectScoringService(),
-                "Roland Merhej", "Développeur", "Chatou", "https://exemple.fr");
+                profileService, "Roland Merhej", "Développeur", "Chatou", "https://exemple.fr");
+        // lenient : tous les tests n'appellent pas l'analyse
+        lenient().when(profileService.get()).thenReturn(profile);
 
         prospect = new Prospect();
         prospect.setId(1L);
@@ -47,7 +55,7 @@ class ProspectAnalysisServiceTest {
     void analyseEnregistreLeResultatEtComposeLEmail() {
         when(prospectRepository.findById(1L)).thenReturn(Optional.of(prospect));
         when(prospectRepository.save(any(Prospect.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(analyzer.analyze(prospect)).thenReturn(new AiAnalysis(
+        when(analyzer.analyze(prospect, profile)).thenReturn(new AiAnalysis(
                 150, "Analyse détaillée.", "Planning des formateurs", "Votre planning", "Bonjour,\nTexte."));
 
         Prospect saved = service.analyze(1L);
@@ -70,7 +78,7 @@ class ProspectAnalysisServiceTest {
     @Test
     void erreurDeLIaNEnregistreRien() {
         when(prospectRepository.findById(1L)).thenReturn(Optional.of(prospect));
-        when(analyzer.analyze(prospect)).thenThrow(new AiUnavailableException("indisponible"));
+        when(analyzer.analyze(prospect, profile)).thenThrow(new AiUnavailableException("indisponible"));
 
         assertThrows(AiUnavailableException.class, () -> service.analyze(1L));
         verify(prospectRepository, never()).save(any());
@@ -105,6 +113,31 @@ class ProspectAnalysisServiceTest {
 
         assertEquals("Objet", prospect.getEmailSubject());
         assertTrue(prospect.getEmailDraft().endsWith(ProspectAnalysisService.OPT_OUT));
+    }
+
+    @Test
+    void uneCandidatureEstSigneeAvecLeTitreDuProfilEtSansMentionDOpposition() {
+        prospect.setMode(ProspectMode.EMPLOI);
+        profile.setTitreSignature("Formateur pour adultes");
+        when(prospectRepository.findById(1L)).thenReturn(Optional.of(prospect));
+        when(prospectRepository.save(any(Prospect.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(analyzer.analyze(prospect, profile)).thenReturn(new AiAnalysis(
+                80, "Analyse.", "Formateur FLE", "Candidature spontanée", "Bonjour,\nTexte."));
+
+        String email = service.analyze(1L).getEmailDraft();
+
+        assertTrue(email.contains("Roland Merhej\nFormateur pour adultes"), "Titre du profil dans la signature");
+        assertFalse(email.contains(ProspectAnalysisService.OPT_OUT));
+    }
+
+    @Test
+    void leBrouillonDUneCandidatureNeRecoitPasDeMentionDOpposition() {
+        prospect.setMode(ProspectMode.EMPLOI);
+        when(prospectRepository.findById(1L)).thenReturn(Optional.of(prospect));
+
+        service.saveDraft(1L, "Objet", "Bonjour,\nTexte.");
+
+        assertEquals("Bonjour,\nTexte.", prospect.getEmailDraft());
     }
 
     @Test

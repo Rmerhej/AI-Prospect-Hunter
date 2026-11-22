@@ -1,6 +1,8 @@
 package fr.prospecthunter.aiprospecthunter.ai;
 
 import fr.prospecthunter.aiprospecthunter.entity.Prospect;
+import fr.prospecthunter.aiprospecthunter.entity.SearchProfile;
+import fr.prospecthunter.aiprospecthunter.enums.ProspectMode;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
 
@@ -39,6 +41,25 @@ class ChatClientProspectAnalyzerTest {
         assertEquals("Société (test)", ChatClientProspectAnalyzer.clean("Société {test}"));
         assertEquals("non renseigné", ChatClientProspectAnalyzer.clean("   "));
         assertFalse(ChatClientProspectAnalyzer.SYSTEM_PROMPT.contains("{"));
+        assertFalse(ChatClientProspectAnalyzer.SYSTEM_PROMPT_EMPLOI.contains("{"));
+    }
+
+    @Test
+    void lePromptEmploiContientLeProfilPuisLEntreprise() {
+        Prospect prospect = new Prospect();
+        prospect.setMode(ProspectMode.EMPLOI);
+        prospect.setName("FORMA ADULTES");
+
+        SearchProfile profile = new SearchProfile();
+        profile.setPosteVise("Formateur FLE");
+        profile.setResumeProfil("Titre CDA {test}");
+
+        String prompt = ChatClientProspectAnalyzer.buildEmploiPrompt(prospect, profile);
+
+        assertTrue(prompt.contains("Poste visé : Formateur FLE"));
+        assertTrue(prompt.contains("Résumé : Titre CDA (test)"), "Les accolades du profil sont retirées");
+        assertTrue(prompt.contains("Nom : FORMA ADULTES"));
+        assertTrue(prompt.indexOf("Poste visé") < prompt.indexOf("Nom : FORMA ADULTES"));
     }
 
     @Test
@@ -59,7 +80,7 @@ class ChatClientProspectAnalyzerTest {
                 new ChatClientProspectAnalyzer(builder, ChatClientProspectAnalyzer.PLACEHOLDER_KEY);
 
         AiUnavailableException e = assertThrows(AiUnavailableException.class,
-                () -> analyzer.analyze(new Prospect()));
+                () -> analyzer.analyze(new Prospect(), new SearchProfile()));
         assertTrue(e.getMessage().contains("GEMINI_API_KEY"));
         verifyNoInteractions(chatClient);
     }

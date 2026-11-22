@@ -4,6 +4,11 @@
 
 Application web de prospection : identifier, qualifier et suivre des organismes susceptibles d'avoir besoin d'une application sur mesure (planning, présences, émargement…).
 
+Elle a deux usages, choisis prospect par prospect :
+
+- **Prospection client** : trouver des entreprises qui ont besoin d'une application de planning ou de présences.
+- **Recherche d'emploi** : trouver des employeurs (formation d'adultes, insertion, informatique) et préparer des candidatures spontanées à partir d'un profil de recherche paramétrable.
+
 Projet personnel d'apprentissage : Spring Boot full stack, puis intégration d'un agent IA.
 
 ## Fonctionnalités
@@ -12,8 +17,11 @@ Projet personnel d'apprentissage : Spring Boot full stack, puis intégration d'u
 - Score automatique (0 à 100) et qualification : *Prioritaire*, *À étudier*, *Faible potentiel*
 - Recherche multicritère (nom, ville, qualification) avec pagination, via Spring Data JPA Specifications
 - Suivi commercial : statut (À contacter → Contacté → Relancé → A répondu → Client / Perdu), financement, horizon du projet
-- **Import automatique** depuis l'API publique Recherche d'entreprises : organismes de formation, restauration, nettoyage, aide à domicile, de 10 à 49 salariés, dans les Yvelines et les Hauts-de-Seine. Les doublons sont évités grâce au SIREN.
-- **Agent IA (Gemini via Spring AI)** : sur la fiche d'un prospect, l'IA évalue sa pertinence (0 à 100), explique pourquoi, propose un besoin et rédige un brouillon d'e-mail. Vous validez le besoin et corrigez l'e-mail : rien n'est envoyé automatiquement. La signature et la mention d'opposition sont ajoutées par le code.
+- **Import automatique** depuis l'API publique Recherche d'entreprises. Les doublons sont évités grâce au SIREN.
+  - Prospection : organismes de formation, restauration, nettoyage, aide à domicile, de 10 à 49 salariés, dans les Yvelines et les Hauts-de-Seine.
+  - Recherche d'emploi : formation d'adultes, insertion et action sociale, ESN et éditeurs de logiciels, de 10 à 499 salariés, dans les départements du profil.
+- **Profil de recherche d'emploi** (page « Profil emploi ») : poste visé, résumé du parcours, départements, titre de la signature. Il sert au score des employeurs et à l'analyse IA.
+- **Agent IA (Gemini via Spring AI)** : sur la fiche d'un prospect, l'IA évalue sa pertinence (0 à 100), explique pourquoi, propose un besoin et rédige un brouillon d'e-mail. Pour un employeur, elle compare l'entreprise à votre profil, propose un poste possible et rédige une candidature spontanée. Vous validez et corrigez : rien n'est envoyé automatiquement. La signature (et, en prospection, la mention d'opposition) est ajoutée par le code.
 - **Tableau de bord** : prospects par statut, secteur et qualification, taux de réponse et de conversion.
 - **Connexion sécurisée** (Spring Security) : toutes les pages demandent un identifiant et un mot de passe, protection CSRF sur tous les formulaires.
 - Validation des formulaires côté serveur et pages d'erreur claires (y compris la cause des erreurs de l'IA, sans jamais afficher la clé API)
@@ -78,6 +86,7 @@ Les tests utilisent une base H2 en mémoire : MySQL n'a pas besoin de tourner.
 - [x] Import automatique d'entreprises via l'API publique Recherche d'entreprises
 - [x] Agent IA (Spring AI + Gemini) pour analyser les prospects et rédiger des brouillons d'e-mails, validés manuellement
 - [x] Application et base de données dans Docker (Docker Compose)
+- [x] Mode « Recherche d'emploi » avec profil de recherche paramétrable
 - [x] Tableau de bord et messages d'erreur IA explicites
 - [x] Authentification (Spring Security), migrations (Flyway), intégration continue (GitHub Actions)
 
