@@ -60,6 +60,16 @@
                             <div class="invalid-feedback" th:errors="*{website}"></div>
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label" for="email">E-mail de contact</label>
+                            <input type="email"
+                                   class="form-control"
+                                   th:field="*{email}"
+                                   th:errorclass="is-invalid"
+                                   placeholder="contact@exemple.fr">
+                            <div class="invalid-feedback" th:errors="*{email}"></div>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-8 mb-3">
                                 <label class="form-label" for="city">Ville</label>

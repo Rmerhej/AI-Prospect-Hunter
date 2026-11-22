@@ -5,10 +5,14 @@ import fr.prospecthunter.aiprospecthunter.enums.HorizonProjet;
 import fr.prospecthunter.aiprospecthunter.enums.ProspectMode;
 import fr.prospecthunter.aiprospecthunter.enums.ProspectStatus;
 import fr.prospecthunter.aiprospecthunter.enums.StatutFinancement;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+
+import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Objet lié au formulaire (DTO).
@@ -27,6 +31,10 @@ public class ProspectForm {
     @Pattern(regexp = "^$|^https?://\\S+$",
             message = "L'adresse doit commencer par http:// ou https://")
     private String website;
+
+    @Size(max = 254, message = "254 caractères maximum")
+    @Email(message = "Adresse e-mail invalide")
+    private String email;
 
     @Size(max = 100, message = "100 caractères maximum")
     private String city;
@@ -61,6 +69,7 @@ public class ProspectForm {
         form.id = prospect.getId();
         form.name = prospect.getName();
         form.website = prospect.getWebsite();
+        form.email = prospect.getEmail();
         form.city = prospect.getCity();
         form.postalCode = prospect.getPostalCode();
         form.sector = prospect.getSector();
@@ -85,6 +94,13 @@ public class ProspectForm {
     public void applyTo(Prospect prospect) {
         prospect.setName(trim(name));
         prospect.setWebsite(trim(website));
+        String newEmail = trim(email);
+        newEmail = (newEmail == null || newEmail.isEmpty()) ? null : newEmail.toLowerCase(Locale.ROOT);
+        // Adresse changée à la main : la page où l'ancienne avait été trouvée ne correspond plus
+        if (!Objects.equals(newEmail, prospect.getEmail())) {
+            prospect.setEmailSource(null);
+        }
+        prospect.setEmail(newEmail);
         prospect.setCity(trim(city));
         prospect.setPostalCode(trim(postalCode));
         prospect.setSector(trim(sector));
@@ -122,6 +138,14 @@ public class ProspectForm {
 
     public void setWebsite(String website) {
         this.website = website;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getCity() {

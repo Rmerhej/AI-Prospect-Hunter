@@ -26,4 +26,17 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => label.textContent = "Copier l'e-mail", 2000);
         });
     }
+
+    // Ouvre la messagerie (Outlook, Gmail, Mail...) avec le brouillon tel qu'il est à l'écran
+    const mailButton = document.getElementById("open-mail");
+    if (mailButton) {
+        mailButton.addEventListener("click", () => {
+            const subject = document.getElementById("subject").value;
+            const body = document.getElementById("body").value;
+            window.location.href = "mailto:" + encodeURIComponent(mailButton.dataset.email)
+                .replace("%40", "@")
+                + "?subject=" + encodeURIComponent(subject)
+                + "&body=" + encodeURIComponent(body);
+        });
+    }
 });

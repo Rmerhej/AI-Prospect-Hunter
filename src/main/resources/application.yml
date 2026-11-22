@@ -58,6 +58,12 @@ prospect-hunter:
     recherche-entreprises:
       base-url: https://recherche-entreprises.api.gouv.fr
 
+  # Recherche web (site officiel des prospects) : https://app.tavily.com
+  # Gratuit : 1 000 recherches par mois, sans carte bancaire. Sans clé, le bouton invite à saisir le site.
+  tavily:
+    base-url: https://api.tavily.com
+    api-key: ${TAVILY_API_KEY:}
+
   # Connexion à l'application (lus dans .env)
   security:
     username: ${APP_USERNAME:roland}

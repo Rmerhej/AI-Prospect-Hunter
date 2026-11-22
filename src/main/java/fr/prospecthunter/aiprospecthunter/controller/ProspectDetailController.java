@@ -1,12 +1,14 @@
 package fr.prospecthunter.aiprospecthunter.controller;
 
 import fr.prospecthunter.aiprospecthunter.ai.AiUnavailableException;
+import fr.prospecthunter.aiprospecthunter.client.ApiUnavailableException;
 import fr.prospecthunter.aiprospecthunter.dto.EmailDraftForm;
 import fr.prospecthunter.aiprospecthunter.entity.Prospect;
 import fr.prospecthunter.aiprospecthunter.enums.TrancheEffectif;
 import fr.prospecthunter.aiprospecthunter.exception.ProspectNotFoundException;
 import fr.prospecthunter.aiprospecthunter.repository.ProspectRepository;
 import fr.prospecthunter.aiprospecthunter.service.ProspectAnalysisService;
+import fr.prospecthunter.aiprospecthunter.service.ProspectEnrichmentService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,11 +25,14 @@ public class ProspectDetailController {
 
     private final ProspectRepository prospectRepository;
     private final ProspectAnalysisService analysisService;
+    private final ProspectEnrichmentService enrichmentService;
 
     public ProspectDetailController(ProspectRepository prospectRepository,
-                                    ProspectAnalysisService analysisService) {
+                                    ProspectAnalysisService analysisService,
+                                    ProspectEnrichmentService enrichmentService) {
         this.prospectRepository = prospectRepository;
         this.analysisService = analysisService;
+        this.enrichmentService = enrichmentService;
     }
 
     @GetMapping
@@ -53,6 +58,18 @@ public class ProspectDetailController {
             redirectAttributes.addFlashAttribute("successMessage",
                     "Analyse terminée. Relisez-la avant d'utiliser le brouillon.");
         } catch (AiUnavailableException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/prospects/" + id;
+    }
+
+    /** Cherche le site officiel (si absent) puis l'e-mail de contact publié sur ce site. */
+    @PostMapping("/enrichir")
+    public String enrich(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            ProspectEnrichmentService.Result result = enrichmentService.enrich(id);
+            redirectAttributes.addFlashAttribute(result.success() ? "successMessage" : "errorMessage", result.message());
+        } catch (ApiUnavailableException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/prospects/" + id;

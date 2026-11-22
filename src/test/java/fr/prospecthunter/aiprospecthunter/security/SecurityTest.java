@@ -79,6 +79,16 @@ class SecurityTest {
     }
 
     @Test
+    @WithMockUser
+    void rechercheDeCoordonneesProtegeeParCsrf() throws Exception {
+        mockMvc.perform(post("/prospects/1/enrichir"))
+                .andExpect(status().isForbidden());
+        // Avec jeton : prospect 1 inexistant -> page "introuvable", sans aucun appel web
+        mockMvc.perform(post("/prospects/1/enrichir").with(csrf()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void deconnexion() throws Exception {
         mockMvc.perform(logout())
                 .andExpect(redirectedUrl("/login?logout"));

@@ -20,6 +20,15 @@ public class Prospect {
 
     private String website;
 
+    // Coordonnées trouvées par la recherche automatique (ou saisies à la main)
+    @Column(length = 254)
+    private String email;
+
+    @Column(length = 500)
+    private String emailSource;
+
+    private LocalDateTime enrichedAt;
+
     private String city;
 
     private String postalCode;
@@ -144,6 +153,30 @@ public class Prospect {
 
     public void setWebsite(String website) {
         this.website = website;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getEmailSource() {
+        return emailSource;
+    }
+
+    public void setEmailSource(String emailSource) {
+        this.emailSource = emailSource;
+    }
+
+    public LocalDateTime getEnrichedAt() {
+        return enrichedAt;
+    }
+
+    public void setEnrichedAt(LocalDateTime enrichedAt) {
+        this.enrichedAt = enrichedAt;
     }
 
     public String getPostalCode() {
